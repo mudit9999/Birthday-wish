@@ -5,6 +5,11 @@ import type { EntryFormState } from '@/lib/actions/entries'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1))
+const TYPES = [
+  { value: 'birthday', label: 'Birthday' },
+  { value: 'anniversary', label: 'Anniversary' },
+  { value: 'special', label: 'Special event' }
+]
 
 function FieldError({ message }: { message?: string }) {
   return message ? <span className="error">{message}</span> : null
@@ -26,26 +31,27 @@ export function EventForm({
   const isSpecial = type === 'special'
 
   return (
-    <form action={formAction} className="stack" noValidate>
-      <label>
-        What is it?
-        <select name="type" value={type} onChange={(event) => setType(event.target.value)}>
-          <option value="birthday">Birthday</option>
-          <option value="anniversary">Anniversary</option>
-          <option value="special">Special event</option>
-        </select>
+    <form action={formAction} className="form" noValidate>
+      <fieldset>
+        <legend>What is it?</legend>
+        {TYPES.map((t) => (
+          <label key={t.value} className="choice">
+            <input type="radio" name="type" value={t.value} checked={type === t.value} onChange={() => setType(t.value)} />
+            {t.label}
+          </label>
+        ))}
         <FieldError message={e.type} />
-      </label>
+      </fieldset>
 
       {isSpecial && (
-        <label>
+        <label className="field">
           Occasion
           <input name="title" defaultValue={v.title} placeholder="e.g. Housewarming" maxLength={100} />
           <FieldError message={e.title} />
         </label>
       )}
 
-      <label>
+      <label className="field">
         {type === 'anniversary' ? 'Couple' : isSpecial ? 'For whom' : 'Name'}
         <input
           name="names"
@@ -57,17 +63,18 @@ export function EventForm({
         <FieldError message={e.names} />
       </label>
 
-      <label>
-        What the family calls them <span className="hint">Optional, e.g. Nani, Mama ji, Chachu</span>
+      <label className="field">
+        What the family calls them
+        <span className="hint">Optional, e.g. Nani, Mama ji, Chachu. The wish uses this name.</span>
         <input name="familyCallsThem" defaultValue={v.familyCallsThem} maxLength={100} />
         <FieldError message={e.familyCallsThem} />
       </label>
 
-      <div className="row">
-        <label>
+      <div className="pair">
+        <label className="field">
           Day
           <select name="day" defaultValue={v.day}>
-            <option value="">–</option>
+            <option value="">Choose</option>
             {DAYS.map((d) => (
               <option key={d} value={d}>
                 {d}
@@ -76,10 +83,10 @@ export function EventForm({
           </select>
           <FieldError message={e.day} />
         </label>
-        <label>
+        <label className="field">
           Month
           <select name="month" defaultValue={v.month}>
-            <option value="">–</option>
+            <option value="">Choose</option>
             {MONTHS.map((m, i) => (
               <option key={m} value={String(i + 1)}>
                 {m}
@@ -93,28 +100,31 @@ export function EventForm({
       {isSpecial ? (
         <fieldset>
           <legend>How often?</legend>
-          <label>
-            <input type="radio" name="repeatsYearly" value="true" defaultChecked={v.repeatsYearly !== 'false'} /> Repeats every year
+          <label className="choice">
+            <input type="radio" name="repeatsYearly" value="true" defaultChecked={v.repeatsYearly !== 'false'} />
+            Every year
           </label>
-          <label>
-            <input type="radio" name="repeatsYearly" value="false" defaultChecked={v.repeatsYearly === 'false'} /> One time only
+          <label className="choice">
+            <input type="radio" name="repeatsYearly" value="false" defaultChecked={v.repeatsYearly === 'false'} />
+            One time only
           </label>
         </fieldset>
       ) : (
         <input type="hidden" name="repeatsYearly" value="true" />
       )}
 
-      <label>
-        Year{' '}
+      <label className="field">
+        Year
         <span className="hint">
-          {isSpecial ? 'Needed for one-time events.' : 'Optional.'} Only you and the admin see it; wishes never mention age.
+          {isSpecial ? 'Needed for a one-time event.' : 'Optional.'} Only you and the admin see it; wishes never mention age.
         </span>
-        <input name="year" defaultValue={v.year} inputMode="numeric" pattern="[0-9]*" maxLength={4} />
+        <input name="year" defaultValue={v.year} inputMode="numeric" pattern="[0-9]*" maxLength={4} className="num" style={{ maxWidth: 160 }} />
         <FieldError message={e.year} />
       </label>
 
-      <label>
-        Note for the wish <span className="hint">Optional. Something the wish can mention, e.g. loves cricket</span>
+      <label className="field">
+        Note for the wish
+        <span className="hint">Optional. Something the wish can mention, e.g. loves cricket.</span>
         <textarea name="note" defaultValue={v.note} maxLength={300} />
         <FieldError message={e.note} />
       </label>
@@ -124,9 +134,11 @@ export function EventForm({
           {e.form}
         </p>
       )}
-      <button type="submit" disabled={pending}>
-        {pending ? 'Saving…' : submitLabel}
-      </button>
+      <div className="buttons">
+        <button type="submit" disabled={pending}>
+          {pending ? 'Saving…' : submitLabel}
+        </button>
+      </div>
     </form>
   )
 }

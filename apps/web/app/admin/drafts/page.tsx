@@ -11,13 +11,17 @@ async function labelFor(db: Db, draft: Draft): Promise<string> {
   return occurrence ? occurrenceLabel(occurrence) : `Wish ${draft.number}`
 }
 
-async function Section({ db, title, drafts }: { db: Db; title: string; drafts: Draft[] }) {
+async function Day({ db, title, drafts, postsAt, empty }: { db: Db; title: string; drafts: Draft[]; postsAt: string; empty: string }) {
   const labels = await Promise.all(drafts.map((d) => labelFor(db, d)))
+  const waiting = drafts.filter((d) => d.status === 'pending').length
   return (
-    <section>
-      <h2>{title}</h2>
+    <section className="section-gap">
+      <div className="panel-head">
+        <h2 style={{ fontSize: 18 }}>{title}</h2>
+        {waiting > 0 && <span className="count">{waiting}</span>}
+      </div>
       {drafts.length === 0 ? (
-        <p className="empty">No wishes.</p>
+        <p className="empty">{empty}</p>
       ) : (
         <div className="stack">
           {drafts.map((d, i) => (
@@ -29,6 +33,7 @@ async function Section({ db, title, drafts }: { db: Db; title: string; drafts: D
               source={d.source}
               error={d.error}
               text={d.text}
+              postsAt={postsAt}
               action={draftFormAction.bind(null, d.id)}
             />
           ))}
@@ -40,21 +45,38 @@ async function Section({ db, title, drafts }: { db: Db; title: string; drafts: D
 
 export default async function DraftsPage() {
   const db = await getDb()
-  const { timeZone, sendTime } = await getSettings(db)
+  const { timeZone, sendTime, draftTime } = await getSettings(db)
   const today = localDate(new Date(), timeZone)
   const tomorrow = addDays(today, 1)
   const dates: ISODate[] = Array.from({ length: FAILED_LOOKBACK_DAYS + 1 }, (_, i) => addDays(today, i - FAILED_LOOKBACK_DAYS + 1))
   const drafts = await listDraftsForDates(db, dates)
   const on = (date: ISODate) => drafts.filter((d) => d.occurrenceDate === date)
   const earlierFailed = drafts.filter((d) => d.occurrenceDate < today && d.status === 'failed')
+  const waiting = drafts.filter((d) => d.status === 'pending' && d.occurrenceDate >= today).length
 
   return (
     <>
-      <h1>Drafts</h1>
-      <p className="muted">Approved wishes post at {sendTime}. Unapproved drafts never post.</p>
-      <Section db={db} title={`Today · ${formatDateLabel(today)}`} drafts={on(today)} />
-      <Section db={db} title={`Tomorrow · ${formatDateLabel(tomorrow)}`} drafts={on(tomorrow)} />
-      {earlierFailed.length > 0 && <Section db={db} title="Failed in the last week" drafts={earlierFailed} />}
+      <header className="title-row" style={{ marginBottom: 0 }}>
+        <div>
+          <h1 className="title">Drafts</h1>
+          <p className="lede">
+            {waiting === 0
+              ? `Nothing is waiting for you. Approved wishes post at ${sendTime}.`
+              : `${waiting} ${waiting === 1 ? 'wish is' : 'wishes are'} waiting for your OK. Unapproved drafts never post.`}
+          </p>
+        </div>
+      </header>
+      <Day db={db} title={`Today · ${formatDateLabel(today)}`} drafts={on(today)} postsAt={sendTime} empty="No wishes today." />
+      <Day
+        db={db}
+        title={`Tomorrow · ${formatDateLabel(tomorrow)}`}
+        drafts={on(tomorrow)}
+        postsAt={sendTime}
+        empty={`Tomorrow’s drafts are written at ${draftTime}. Use “Draft tomorrow’s wishes” on the WhatsApp page to write them now.`}
+      />
+      {earlierFailed.length > 0 && (
+        <Day db={db} title="Failed in the last week" drafts={earlierFailed} postsAt={sendTime} empty="" />
+      )}
     </>
   )
 }

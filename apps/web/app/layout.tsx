@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from 'next'
+import { Instrument_Sans, Instrument_Serif } from 'next/font/google'
 import './globals.css'
+
+const sans = Instrument_Sans({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-sans' })
+const serif = Instrument_Serif({ subsets: ['latin'], weight: '400', variable: '--font-serif' })
 
 export const metadata: Metadata = {
   title: 'Family Wishes',
@@ -10,12 +14,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#fbf7f0'
+  themeColor: '#ffffff'
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <body>{children}</body>
     </html>
   )

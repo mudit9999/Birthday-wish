@@ -15,7 +15,7 @@ export function SimpleForm({
 }) {
   const [state, formAction, pending] = useActionState(action, { error: null })
   return (
-    <form action={formAction} className="stack">
+    <form action={formAction} className="form">
       {children}
       {state.error && (
         <p role="alert" className="error">

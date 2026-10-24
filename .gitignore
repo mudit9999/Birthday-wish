@@ -10,5 +10,6 @@ deploy/worker/data/
 test-results/
 playwright-report/
 .superpowers/
+.taste-skill/
 .claude/settings.local.json
 .claude/worktrees/

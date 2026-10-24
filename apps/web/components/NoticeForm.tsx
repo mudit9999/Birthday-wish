@@ -17,11 +17,13 @@ export function NoticeForm({
 }) {
   const [state, formAction, pending] = useActionState(action, { message: null, error: false })
   return (
-    <form action={formAction} className="stack">
+    <form action={formAction} className="form">
       {children}
-      <button type="submit" className={className} disabled={pending}>
-        {pending ? 'Please wait…' : submitLabel}
-      </button>
+      <div className="buttons">
+        <button type="submit" className={className} disabled={pending}>
+          {pending ? 'Please wait…' : submitLabel}
+        </button>
+      </div>
       {state.message && (
         <p role="status" className={state.error ? 'error' : 'muted'}>
           {state.message}

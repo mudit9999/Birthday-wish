@@ -1,5 +1,6 @@
 import { getEvent } from '@family-wishes/db'
 import { notFound } from 'next/navigation'
+import { EntryLayout } from '@/components/EntryLayout'
 import { EventForm } from '@/components/EventForm'
 import { saveEntryAction } from '@/lib/actions/entries'
 import { getDb } from '@/lib/db'
@@ -16,13 +17,12 @@ export default async function EditEntryPage({ params, searchParams }: PageProps<
   if (!event || (!member.isAdmin && event.addedBy !== member.id)) notFound()
 
   return (
-    <>
-      <h1>Edit entry</h1>
+    <EntryLayout title={`Edit ${event.names}`} lede="Changes apply from the next draft.">
       <EventForm
         action={saveEntryAction.bind(null, event.id, safeReturnPath(typeof back === 'string' ? back : undefined, '/entries'))}
         initial={entryFormValues(event)}
         submitLabel="Save changes"
       />
-    </>
+    </EntryLayout>
   )
 }
