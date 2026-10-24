@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.next/
+coverage/
+.pglite*/
+backups/
+deploy/worker/data/
+test-results/
+playwright-report/
+.superpowers/
+.claude/settings.local.json
