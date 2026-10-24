@@ -11,3 +11,4 @@ test-results/
 playwright-report/
 .superpowers/
 .claude/settings.local.json
+.claude/worktrees/
