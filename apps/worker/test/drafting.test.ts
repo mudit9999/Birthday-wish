@@ -3,14 +3,16 @@ import {
   createEvent,
   createFestival,
   ensureAdmin,
+  getCard,
   getSettings,
   listDraftsForDates,
+  setSetting,
   type DbHandle
 } from '@family-wishes/db'
 import { createTestDb } from '@family-wishes/db/testing'
 import { afterEach, beforeEach, expect, test } from 'vitest'
 import { ensureDraftsFor } from '../src/jobs/drafting.ts'
-import { ADMIN_PHONE, FakeModel, testDeps } from './fakes.ts'
+import { ADMIN_PHONE, FAKE_CARD, FakeCardModel, FakeModel, testDeps } from './fakes.ts'
 
 const DATE = '2026-12-05'
 
@@ -117,4 +119,31 @@ test('a day with nothing on it sends nothing', async () => {
   const deps = testDeps(h.db)
   expect(await ensureDraftsFor('2026-12-06', deps)).toEqual([])
   expect(deps.messenger.sent).toHaveLength(0)
+})
+
+test('each new draft gets a greeting card, made without the birth year', async () => {
+  const cardModel = new FakeCardModel()
+  const created = await ensureDraftsFor(DATE, testDeps(h.db, { cardModel }))
+  for (const d of created) {
+    expect(Buffer.from((await getCard(h.db, d.id))?.data ?? []).toString('base64')).toBe(FAKE_CARD.base64)
+  }
+  expect(cardModel.prompts).toHaveLength(2)
+  expect(cardModel.prompts.join('\n')).toContain('Happy Birthday, Chachu')
+  expect(cardModel.prompts.join('\n')).not.toContain('1958')
+})
+
+test('no card is made when cards are switched off', async () => {
+  await setSetting(h.db, 'card_images', 'off')
+  const cardModel = new FakeCardModel()
+  const created = await ensureDraftsFor(DATE, testDeps(h.db, { cardModel }))
+  expect(cardModel.prompts).toHaveLength(0)
+  expect(await getCard(h.db, created[0]?.id ?? '')).toBeNull()
+})
+
+test('a failed card leaves the draft in place without one', async () => {
+  const deps = testDeps(h.db, { cardModel: new FakeCardModel(new Error('quota')) })
+  const created = await ensureDraftsFor(DATE, deps)
+  expect(created).toHaveLength(2)
+  expect(await getCard(h.db, created[0]?.id ?? '')).toBeNull()
+  expect(deps.messenger.to('self')).toHaveLength(1)
 })

@@ -83,3 +83,10 @@ test('saveSettings validates every field and stores valid values', async () => {
   expect(await saveSettings(h.db, admin, SETTINGS)).toEqual({ ok: true })
   expect(await getSettings(h.db)).toMatchObject({ sendTime: '08:30', aiStyle: 'Short and sweet, in Hinglish.' })
 })
+
+test('the greeting card switch is on when ticked and off when left unticked', async () => {
+  expect(await saveSettings(h.db, admin, { ...SETTINGS, card_images: 'on' })).toEqual({ ok: true })
+  expect((await getSettings(h.db)).cardImages).toBe(true)
+  expect(await saveSettings(h.db, admin, SETTINGS)).toEqual({ ok: true })
+  expect((await getSettings(h.db)).cardImages).toBe(false)
+})

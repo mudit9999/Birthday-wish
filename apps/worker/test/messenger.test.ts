@@ -10,7 +10,7 @@ function fakeSocket(opts: { failSend?: boolean } = {}) {
       calls.push(`presence:${type}:${jid}`)
     },
     async sendMessage(jid, content, options) {
-      calls.push(`send:${jid}:${content.text}`)
+      calls.push('text' in content ? `send:${jid}:${content.text}` : `image:${jid}:${content.mimetype}:${content.image.length}:${content.caption}`)
       if (opts.failSend) throw new Error('boom')
       return { key: { id: options?.messageId ?? null } }
     }
@@ -25,6 +25,14 @@ test('a group send types first, then sends, then pauses, and records the id', as
   expect(await m.sendToGroup('fam@g.us', 'Happy Diwali!')).toBe('ID1')
   expect(calls).toEqual(['presence:composing:fam@g.us', 'send:fam@g.us:Happy Diwali!', 'presence:paused:fam@g.us'])
   expect(sentIds.has('ID1')).toBe(true)
+})
+
+test('a group send with a card sends one image message with the wish as its caption', async () => {
+  const { sock, calls } = fakeSocket()
+  const m = createHumanMessenger(sock, { selfJid: SELF, sentIds: new SentIds(), delayMs: () => 0, newId: () => 'ID5' })
+  const card = { data: new Uint8Array([1, 2, 3, 4]), mimeType: 'image/png' }
+  expect(await m.sendToGroup('fam@g.us', 'Happy Diwali!', card)).toBe('ID5')
+  expect(calls).toEqual(['presence:composing:fam@g.us', 'image:fam@g.us:image/png:4:Happy Diwali!', 'presence:paused:fam@g.us'])
 })
 
 test('sendToSelf goes to the self JID without typing', async () => {

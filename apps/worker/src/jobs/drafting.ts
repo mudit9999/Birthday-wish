@@ -1,6 +1,7 @@
 import {
   formatDateLabel,
   formatDraftBatch,
+  generateCard,
   generateWish,
   occurrencesOn,
   toWishInput,
@@ -14,6 +15,7 @@ import {
   listEvents,
   listFestivals,
   markNotified,
+  saveCard,
   setSetting,
   unnotifiedDrafts,
   type Draft
@@ -29,6 +31,18 @@ function occasionRef(o: Occurrence): { eventId: string } | { festivalId: string 
   return o.kind === 'event' ? { eventId: o.event.id } : { festivalId: o.festival.id }
 }
 
+// A missing card never blocks the wish: it simply posts as text.
+async function addCard(draft: Draft, o: Occurrence, deps: WorkerDeps): Promise<void> {
+  if (!deps.cardModel) return
+  try {
+    const card = await generateCard(toWishInput(o), deps.cardModel)
+    if (card) await saveCard(deps.db, draft.id, card)
+    else deps.log.warn({ draft: draft.number }, 'greeting card could not be made; the wish will post as text')
+  } catch (error) {
+    deps.log.error({ err: error, draft: draft.number }, 'saving greeting card failed')
+  }
+}
+
 async function createMissingDrafts(date: ISODate, deps: WorkerDeps): Promise<Draft[]> {
   const { db } = deps
   const settings = await getSettings(db)
@@ -42,7 +56,9 @@ async function createMissingDrafts(date: ISODate, deps: WorkerDeps): Promise<Dra
   for (const o of missing) {
     const wish = await generateWish(toWishInput(o), settings.aiStyle, deps.model)
     const draft = await insertDraftIfMissing(db, { occurrenceDate: date, ...occasionRef(o), ...wish })
-    if (draft) created.push(draft)
+    if (!draft) continue
+    created.push(draft)
+    if (settings.cardImages) await addCard(draft, o, deps)
   }
   return created
 }

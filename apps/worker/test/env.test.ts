@@ -1,4 +1,4 @@
-import { DEFAULT_GEMINI_MODEL } from '@family-wishes/core'
+import { DEFAULT_CARD_MODEL, DEFAULT_GEMINI_MODEL } from '@family-wishes/core'
 import { expect, test } from 'vitest'
 import { loadWorkerEnv } from '../src/env.ts'
 
@@ -12,14 +12,16 @@ test('applies defaults', () => {
   expect(loadWorkerEnv(VALID)).toEqual({
     ...VALID,
     GEMINI_MODEL: DEFAULT_GEMINI_MODEL,
+    GEMINI_IMAGE_MODEL: DEFAULT_CARD_MODEL,
     BACKUP_DIR: '/data/backups',
     LOG_LEVEL: 'info'
   })
 })
 
 test('blank optional values fall back to defaults', () => {
-  expect(loadWorkerEnv({ ...VALID, GEMINI_MODEL: '', LOG_LEVEL: '' })).toMatchObject({
+  expect(loadWorkerEnv({ ...VALID, GEMINI_MODEL: '', GEMINI_IMAGE_MODEL: '', LOG_LEVEL: '' })).toMatchObject({
     GEMINI_MODEL: DEFAULT_GEMINI_MODEL,
+    GEMINI_IMAGE_MODEL: DEFAULT_CARD_MODEL,
     LOG_LEVEL: 'info'
   })
 })

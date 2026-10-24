@@ -86,7 +86,9 @@ const settingsSchema = z.object({
   send_time: time,
   time_zone: z.string().trim().refine(isValidTimeZone, 'Use a time zone such as Asia/Kolkata'),
   country_code: z.string().trim().regex(/^\d{1,3}$/, 'Use 1–3 digits, e.g. 91'),
-  ai_style: z.string().trim().min(1, 'Describe the style in a few words').max(AI_STYLE_MAX, `Keep this under ${AI_STYLE_MAX} characters`)
+  ai_style: z.string().trim().min(1, 'Describe the style in a few words').max(AI_STYLE_MAX, `Keep this under ${AI_STYLE_MAX} characters`),
+  // An unticked checkbox sends nothing, which means off.
+  card_images: z.preprocess((v) => (v === 'on' ? 'on' : 'off'), z.enum(['on', 'off']))
 })
 
 export type SettingsResult = { ok: true } | { ok: false; errors: Record<string, string> }

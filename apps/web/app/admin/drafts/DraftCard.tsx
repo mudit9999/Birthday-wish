@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
+import Image from 'next/image'
+import { useActionState, useState } from 'react'
 import type { NoticeState } from '@/lib/actions/admin'
 
 export type DraftCardProps = {
@@ -12,6 +13,7 @@ export type DraftCardProps = {
   text: string
   postsAt: string
   isToday: boolean
+  cardSrc: string | null
   action: (prev: NoticeState, formData: FormData) => Promise<NoticeState>
 }
 
@@ -27,10 +29,14 @@ const STATUS: Record<string, { label: string; pill: string }> = {
 }
 const SOURCE: Record<string, string> = { ai: 'Written by Gemini', template: 'Template (AI unavailable)', admin: 'Your text' }
 
-export function DraftCard({ number, label, status, source, error, text, postsAt, isToday, action }: DraftCardProps) {
+export function DraftCard({ number, label, status, source, error, text, postsAt, isToday, cardSrc, action }: DraftCardProps) {
   const [state, formAction, pending] = useActionState(action, { message: null, error: false })
+  const [intent, setIntent] = useState<string | null>(null)
   const open = OPEN.includes(status)
   const s = STATUS[status] ?? { label: status, pill: '' }
+  const card = cardSrc && (
+    <Image src={cardSrc} alt={`Greeting card for ${label}`} width={360} height={480} unoptimized className="card-image" />
+  )
 
   return (
     <article className="panel">
@@ -42,19 +48,31 @@ export function DraftCard({ number, label, status, source, error, text, postsAt,
           {s.label}
         </span>
       </div>
-      <form action={formAction} className="draft">
+      <form action={formAction} className="draft" onClickCapture={(event) => {
+        const button = (event.target as HTMLElement).closest('button')
+        if (button?.name === 'intent') setIntent(button.value)
+      }}>
         <div className="form">
           {open ? (
-            <textarea name="text" defaultValue={text} aria-label={`Wish ${number}`} rows={5} className="message-edit" />
+            <>
+              {card}
+              <textarea name="text" defaultValue={text} aria-label={`Wish ${number}`} rows={5} className="message-edit" />
+            </>
           ) : (
-            <p className="message">
-              {text}
+            <div className="message">
+              {card}
+              <p>{text}</p>
               <span className="stamp">{postsAt}</span>
-            </p>
+            </div>
           )}
           {error && <p className="error">{error}</p>}
           {status === 'failed' && <p className="muted">Check the group first — it may have posted.</p>}
-          {state.message && (
+          {pending && intent === 'card_new' && (
+            <p role="status" className="muted">
+              Gemini is drawing the card. This takes up to a minute…
+            </p>
+          )}
+          {!pending && state.message && (
             <p role="status" className={state.error ? 'error' : 'muted'}>
               {state.message}
             </p>
@@ -69,6 +87,10 @@ export function DraftCard({ number, label, status, source, error, text, postsAt,
             <div>
               <dt>Words</dt>
               <dd>{SOURCE[source] ?? source}</dd>
+            </div>
+            <div>
+              <dt>Posts as</dt>
+              <dd>{cardSrc ? 'Card with the wish as its caption' : 'Text only'}</dd>
             </div>
           </dl>
           {open && (
@@ -104,6 +126,18 @@ export function DraftCard({ number, label, status, source, error, text, postsAt,
               <button type="submit" name="intent" value="skip" className="text" disabled={pending || status === 'skipped'}>
                 Skip this one
               </button>
+            </div>
+          )}
+          {open && (
+            <div className="buttons">
+              <button type="submit" name="intent" value="card_new" className="secondary" disabled={pending}>
+                {cardSrc ? 'New card' : 'Make a card'}
+              </button>
+              {cardSrc && (
+                <button type="submit" name="intent" value="card_remove" className="text" disabled={pending}>
+                  Remove card
+                </button>
+              )}
             </div>
           )}
         </div>

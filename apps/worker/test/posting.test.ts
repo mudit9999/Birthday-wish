@@ -3,16 +3,18 @@ import {
   applyDraftAction,
   createEvent,
   ensureAdmin,
+  getCard,
   insertDraftIfMissing,
   listDraftsForDates,
+  saveCard,
   setSetting,
   type DbHandle,
   type Draft
 } from '@family-wishes/db'
 import { createTestDb } from '@family-wishes/db/testing'
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { expireOldDrafts, postDueDrafts, recoverInterruptedSends } from '../src/jobs/posting.ts'
-import { ADMIN_PHONE, fixedNow, testDeps } from './fakes.ts'
+import { expireOldDrafts, postDueDrafts, pruneOldCards, recoverInterruptedSends } from '../src/jobs/posting.ts'
+import { ADMIN_PHONE, FAKE_CARD, fixedNow, testDeps } from './fakes.ts'
 
 const TODAY = '2026-12-05'
 const GROUP = '120363000000@g.us'
@@ -113,6 +115,30 @@ test('ignoreSendTime posts before send time', async () => {
 test('only today’s drafts post', async () => {
   await approved('Tomorrow', '2026-12-06')
   expect(await postDueDrafts(testDeps(h.db, { now: at('09:00') }))).toBe(0)
+})
+
+test('a draft with a card posts as one image message captioned with the wish', async () => {
+  const withCard = await approved('Card')
+  await approved('Plain')
+  await saveCard(h.db, withCard.id, FAKE_CARD)
+
+  const deps = testDeps(h.db, { now: at('08:00') })
+  expect(await postDueDrafts(deps)).toBe(2)
+  const [first, second] = deps.messenger.sent
+  expect(first?.text).toBe('Happy birthday Card!')
+  expect(first?.card?.mimeType).toBe('image/png')
+  expect(Buffer.from(first?.card?.data ?? []).toString('base64')).toBe(FAKE_CARD.base64)
+  expect(second).toEqual({ to: 'group', text: 'Happy birthday Plain!' })
+})
+
+test('pruneOldCards deletes cards of drafts more than a week old', async () => {
+  const old = await approved('Old', '2026-11-27')
+  const recent = await approved('Recent', '2026-11-29')
+  await saveCard(h.db, old.id, FAKE_CARD)
+  await saveCard(h.db, recent.id, FAKE_CARD)
+  expect(await pruneOldCards(testDeps(h.db, { now: at('03:00') }))).toBe(1)
+  expect(await getCard(h.db, old.id)).toBeNull()
+  expect(await getCard(h.db, recent.id)).not.toBeNull()
 })
 
 test('expireOldDrafts closes yesterday’s drafts', async () => {

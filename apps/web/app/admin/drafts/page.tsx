@@ -1,5 +1,5 @@
 import { addDays, formatDateLabel, localDate, occurrenceLabel, type ISODate } from '@family-wishes/core'
-import { getSettings, listDraftsForDates, occurrenceForDraft, type Db, type Draft } from '@family-wishes/db'
+import { cardTimes, getSettings, listDraftsForDates, occurrenceForDraft, type Db, type Draft } from '@family-wishes/db'
 import { draftFormAction } from '@/lib/actions/drafts'
 import { getDb } from '@/lib/db'
 import { DraftCard } from './DraftCard'
@@ -9,6 +9,11 @@ const FAILED_LOOKBACK_DAYS = 7
 async function labelFor(db: Db, draft: Draft): Promise<string> {
   const occurrence = await occurrenceForDraft(db, draft)
   return occurrence ? occurrenceLabel(occurrence) : `Wish ${draft.number}`
+}
+
+// The version query makes the browser fetch a replaced card instead of its cached copy.
+function cardSrc(draftId: string, madeAt: Date | undefined): string | null {
+  return madeAt ? `/admin/drafts/${draftId}/card?v=${madeAt.getTime()}` : null
 }
 
 async function Day({
@@ -27,6 +32,10 @@ async function Day({
   isToday?: boolean
 }) {
   const labels = await Promise.all(drafts.map((d) => labelFor(db, d)))
+  const cards = await cardTimes(
+    db,
+    drafts.map((d) => d.id)
+  )
   const waiting = drafts.filter((d) => d.status === 'pending').length
   return (
     <section className="section-gap">
@@ -49,6 +58,7 @@ async function Day({
               text={d.text}
               postsAt={postsAt}
               isToday={isToday}
+              cardSrc={cardSrc(d.id, cards.get(d.id))}
               action={draftFormAction.bind(null, d.id)}
             />
           ))}

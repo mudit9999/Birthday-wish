@@ -1,19 +1,27 @@
 import { phoneToJid } from '@family-wishes/core'
 import { generateMessageIDV2 } from 'baileys'
 
+/** An image to send with a message; the text becomes its caption. */
+export interface OutgoingCard {
+  data: Uint8Array
+  mimeType: string
+}
+
 export interface Messenger {
   isReady(): boolean
-  sendToGroup(groupJid: string, text: string): Promise<string>
+  sendToGroup(groupJid: string, text: string, card?: OutgoingCard): Promise<string>
   sendToSelf(text: string): Promise<string>
   sendToPhone(phone: string, text: string): Promise<string>
 }
+
+type Content = { text: string } | { image: Buffer; caption: string; mimetype: string }
 
 /** The slice of a Baileys socket the messenger needs. */
 export interface SocketLike {
   sendPresenceUpdate(type: 'composing' | 'paused', toJid?: string): Promise<void>
   sendMessage(
     jid: string,
-    content: { text: string },
+    content: Content,
     options?: { messageId?: string }
   ): Promise<{ key: { id?: string | null } } | undefined>
 }
@@ -60,15 +68,16 @@ export function createHumanMessenger(
   const delayMs = opts.delayMs ?? randomTypingDelay
   const newId = opts.newId ?? (() => generateMessageIDV2())
 
-  async function send(jid: string, text: string, typeFirst: boolean): Promise<string> {
+  async function send(jid: string, text: string, typeFirst: boolean, card?: OutgoingCard): Promise<string> {
     const messageId = newId()
     opts.sentIds.add(messageId)
     if (typeFirst) {
       await sock.sendPresenceUpdate('composing', jid)
       await sleep(delayMs())
     }
+    const content: Content = card ? { image: Buffer.from(card.data), caption: text, mimetype: card.mimeType } : { text }
     try {
-      const sent = await sock.sendMessage(jid, { text }, { messageId })
+      const sent = await sock.sendMessage(jid, content, { messageId })
       return sent?.key.id ?? messageId
     } finally {
       if (typeFirst) await sock.sendPresenceUpdate('paused', jid).catch(() => undefined)
@@ -77,7 +86,7 @@ export function createHumanMessenger(
 
   return {
     isReady: opts.isReady ?? (() => true),
-    sendToGroup: (groupJid, text) => send(groupJid, text, true),
+    sendToGroup: (groupJid, text, card) => send(groupJid, text, true, card),
     sendToSelf: (text) => send(opts.selfJid, text, false),
     sendToPhone: (phone, text) => send(phoneToJid(phone), text, true)
   }

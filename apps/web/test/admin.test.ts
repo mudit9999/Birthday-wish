@@ -20,7 +20,7 @@ const VALID = {
 }
 
 test('parseWebEnv accepts a complete environment', () => {
-  expect(parseWebEnv(VALID)).toMatchObject({ ...VALID, GEMINI_MODEL: 'gemini-3.5-flash-lite' })
+  expect(parseWebEnv(VALID)).toMatchObject({ ...VALID, GEMINI_MODEL: 'gemini-3.5-flash-lite', GEMINI_IMAGE_MODEL: 'gemini-3.1-flash-image' })
 })
 
 test.each([

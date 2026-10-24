@@ -22,6 +22,7 @@ test('getSettings returns the seeded defaults with empty values as null', async 
     sendTime: '08:00',
     timeZone: 'Asia/Kolkata',
     countryCode: '91',
+    cardImages: true,
     activeBatchDate: null
   })
   expect(settings.aiStyle.length).toBeGreaterThan(0)
@@ -31,9 +32,11 @@ test('setSetting overwrites a value', async () => {
   await setSetting(h.db, 'send_time', '09:15')
   await setSetting(h.db, 'group_id', '1203630@g.us')
   await setSetting(h.db, 'active_batch_date', '2026-10-25')
+  await setSetting(h.db, 'card_images', 'off')
   expect(await getSettings(h.db)).toMatchObject({
     sendTime: '09:15',
     groupId: '1203630@g.us',
-    activeBatchDate: '2026-10-25'
+    activeBatchDate: '2026-10-25',
+    cardImages: false
   })
 })

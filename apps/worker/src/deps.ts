@@ -1,4 +1,4 @@
-import type { WishModel } from '@family-wishes/core'
+import type { CardModel, WishModel } from '@family-wishes/core'
 import type { Db } from '@family-wishes/db'
 import type { Logger } from 'pino'
 import type { Messenger } from './wa/messenger.ts'
@@ -8,6 +8,7 @@ export interface WorkerDeps {
   db: Db
   messenger: Messenger
   model: WishModel | null
+  cardModel: CardModel | null
   adminPhone: string
   backupDir: string
   log: Logger

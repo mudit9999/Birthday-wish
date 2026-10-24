@@ -12,10 +12,12 @@ function Err({ message }: { message?: string }) {
 export function SettingsForm({
   action,
   values,
+  cardImages,
   sample
 }: {
   action: (prev: SettingsFormState, formData: FormData) => Promise<SettingsFormState>
   values: Values
+  cardImages: boolean
   sample: string
 }) {
   const [state, formAction, pending] = useActionState(action, { errors: {}, saved: false })
@@ -86,6 +88,22 @@ export function SettingsForm({
             Style
             <textarea name="ai_style" defaultValue={values.ai_style} maxLength={1000} rows={5} />
             <Err message={e.ai_style} />
+          </label>
+        </div>
+      </div>
+
+      <div className="settings-row">
+        <div>
+          <h2>Greeting cards</h2>
+          <p className="desc">
+            Gemini draws a card for each occasion, and the wish posts as its caption in one message. You can redraw or remove a card on the
+            Drafts page. If a card can’t be made, the wish posts as text.
+          </p>
+        </div>
+        <div className="panel form">
+          <label className="choice" style={{ alignSelf: 'flex-start' }}>
+            <input type="checkbox" name="card_images" defaultChecked={cardImages} />
+            Make a greeting card for every wish
           </label>
           {e.form && <p className="error">{e.form}</p>}
           <div className="buttons">

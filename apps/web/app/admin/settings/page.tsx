@@ -27,6 +27,7 @@ export default async function SettingsPage() {
           country_code: s.countryCode,
           ai_style: s.aiStyle
         }}
+        cardImages={s.cardImages}
       />
     </>
   )

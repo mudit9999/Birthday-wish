@@ -1,4 +1,4 @@
-import { DEFAULT_GEMINI_MODEL } from '@family-wishes/core'
+import { DEFAULT_CARD_MODEL, DEFAULT_GEMINI_MODEL } from '@family-wishes/core'
 import { z } from 'zod'
 
 const blankAsMissing = (value: unknown) => (value === '' ? undefined : value)
@@ -10,6 +10,7 @@ const workerEnvSchema = z.object({
     .regex(/^\d{8,15}$/, 'must be 8–15 digits in international format without + (e.g. 919876543210)'),
   GEMINI_API_KEY: z.string({ error: 'is required' }).min(1, 'is required'),
   GEMINI_MODEL: z.preprocess(blankAsMissing, z.string().default(DEFAULT_GEMINI_MODEL)),
+  GEMINI_IMAGE_MODEL: z.preprocess(blankAsMissing, z.string().default(DEFAULT_CARD_MODEL)),
   BACKUP_DIR: z.preprocess(blankAsMissing, z.string().default('/data/backups')),
   LOG_LEVEL: z.preprocess(
     blankAsMissing,

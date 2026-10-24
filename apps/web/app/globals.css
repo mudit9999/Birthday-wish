@@ -824,6 +824,36 @@ button.danger {
   font-variant-numeric: tabular-nums;
 }
 
+.message > p {
+  margin: 0;
+}
+
+/* An image message: the card fills the bubble's top, the wish is its caption. */
+.message:has(> .card-image) {
+  max-width: 360px;
+  padding: 6px 6px 22px;
+}
+
+.message:has(> .card-image) > p {
+  padding: 0 8px;
+}
+
+.card-image {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.message > .card-image {
+  max-width: none;
+  margin-bottom: 10px;
+}
+
 .message-edit {
   max-width: 520px;
   border-radius: 4px 14px 14px 14px;

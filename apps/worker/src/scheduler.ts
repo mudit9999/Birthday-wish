@@ -5,7 +5,7 @@ import { writeBackup } from './jobs/backup.ts'
 import { sendFestivalReminder, sendNudge } from './jobs/daily.ts'
 import { ensureDraftsFor } from './jobs/drafting.ts'
 import { sendOutbox } from './jobs/outbox.ts'
-import { expireOldDrafts, postDueDrafts, recoverInterruptedSends } from './jobs/posting.ts'
+import { expireOldDrafts, postDueDrafts, pruneOldCards, recoverInterruptedSends } from './jobs/posting.ts'
 
 const FAST_TICK_MS = 5_000
 const SLOW_TICK_MS = 60_000
@@ -60,6 +60,7 @@ export async function slowTick(deps: WorkerDeps): Promise<void> {
     await safely(deps, 'draft-tomorrow', () => ensureDraftsFor(tomorrow, deps))
   }
   await oncePerDay(deps, 'archive', today, () => archivePastOneTimeEvents(deps.db, today))
+  await oncePerDay(deps, 'prune_cards', today, () => pruneOldCards(deps))
   if (isTimeReached(time, BACKUP_TIME)) {
     await oncePerDay(deps, 'backup', today, () => writeBackup(deps))
   }

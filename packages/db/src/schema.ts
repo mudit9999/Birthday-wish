@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   boolean,
+  customType,
   date,
   jsonb,
   pgTable,
@@ -14,6 +15,7 @@ import {
 
 const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 const timestamptz = (name: string) => timestamp(name, { withTimezone: true })
+const bytea = customType<{ data: Uint8Array; driverData: Uint8Array }>({ dataType: () => 'bytea' })
 
 export const members = pgTable('members', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -78,6 +80,15 @@ export const drafts = pgTable(
     unique().on(t.occurrenceDate, t.number)
   ]
 )
+
+export const draftCards = pgTable('draft_cards', {
+  draftId: uuid('draft_id')
+    .primaryKey()
+    .references(() => drafts.id, { onDelete: 'cascade' }),
+  image: bytea('image').notNull(),
+  mimeType: text('mime_type').notNull(),
+  createdAt: createdAt()
+})
 
 export const settings = pgTable('settings', {
   key: text('key').primaryKey(),

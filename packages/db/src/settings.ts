@@ -9,6 +9,7 @@ export interface Settings {
   sendTime: string
   timeZone: string
   aiStyle: string
+  cardImages: boolean
   countryCode: string
   activeBatchDate: ISODate | null
 }
@@ -20,6 +21,7 @@ export type SettingKey =
   | 'send_time'
   | 'time_zone'
   | 'ai_style'
+  | 'card_images'
   | 'country_code'
   | 'active_batch_date'
 
@@ -31,6 +33,7 @@ const DEFAULTS: Record<SettingKey, string> = {
   send_time: '08:00',
   time_zone: 'Asia/Kolkata',
   ai_style: '',
+  card_images: 'on',
   country_code: '91',
   active_batch_date: ''
 }
@@ -46,6 +49,7 @@ export async function getSettings(db: Db): Promise<Settings> {
     sendTime: value('send_time'),
     timeZone: value('time_zone'),
     aiStyle: value('ai_style'),
+    cardImages: value('card_images') === 'on',
     countryCode: value('country_code'),
     activeBatchDate: value('active_batch_date') || null
   }
