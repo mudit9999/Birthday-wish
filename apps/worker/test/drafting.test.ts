@@ -128,7 +128,7 @@ test('each new draft gets a greeting card, made without the birth year', async (
     expect(Buffer.from((await getCard(h.db, d.id))?.data ?? []).toString('base64')).toBe(FAKE_CARD.base64)
   }
   expect(cardModel.prompts).toHaveLength(2)
-  expect(cardModel.prompts.join('\n')).toContain('Happy Birthday, Chachu')
+  expect(cardModel.prompts.join('\n')).toContain('"Chachu"')
   expect(cardModel.prompts.join('\n')).not.toContain('1958')
 })
 

@@ -54,7 +54,9 @@ Copy `.env.example` to `.env` in the repository root and fill it in:
 | `DATABASE_URL` | yes | Supabase → **Connect** → *Transaction pooler* URI (port 6543). If your password contains `@`, `#` or `/`, write it percent-encoded. |
 | `GEMINI_API_KEY` | yes | Your Gemini API key |
 | `GEMINI_MODEL` | no | Text model for wishes. Default `gemini-3.5-flash-lite` |
-| `GEMINI_IMAGE_MODEL` | no | Image model for greeting cards. Default `gemini-3.1-flash-image` |
+| `GEMINI_IMAGE_MODEL` | no | Gemini image model for greeting cards. Default `gemini-3.1-flash-image` |
+| `POLLINATIONS_API_KEY` | no | A Pollinations secret key (`sk_...`). When set, greeting cards are made by Pollinations instead of Gemini |
+| `POLLINATIONS_IMAGE_MODEL` | no | Pollinations image model. Default `tongyi-mai/z-image-turbo` |
 | `ADMIN_PHONE` | yes | The admin's WhatsApp number, international digits without `+`, e.g. `919876543210` |
 | `ADMIN_PASSWORD` | web | At least 16 characters; used at `/login/admin` |
 | `SESSION_SECRET` | web | At least 32 random characters |
@@ -143,9 +145,14 @@ The admin can also reply on WhatsApp instead of using the website:
 
 ## Greeting cards
 
-When **Greeting cards** is on in Settings, the worker asks Gemini's image model to draw a card for each draft, and the wish posts as the card's caption in a single message. On the Drafts page you can make a new card or remove one.
+When **Greeting cards** is on in Settings, the worker draws a card for each draft and the wish posts as the card's caption in a single message. On the Drafts page you can make a new card or remove one.
 
-Gemini image models have **no free-tier quota**, so cards need billing enabled on the Google project that owns your API key. Without it, Gemini refuses the request, no card is saved, and wishes post as text.
+Cards come from **Pollinations** when `POLLINATIONS_API_KEY` is set, otherwise from **Gemini**:
+
+- **Pollinations** (recommended): `tongyi-mai/z-image-turbo` works on Pollinations' free Quest Pollen. Get a secret key at [enter.pollinations.ai](https://enter.pollinations.ai/keys). Pollinations keeps generated images at unlisted public URLs for about 30 days.
+- **Gemini**: image models have no free-tier quota, so billing must be enabled on the Google project that owns your key.
+
+If a card can't be made, no card is saved and the wish posts as text.
 
 ## Develop without Supabase
 
@@ -173,7 +180,8 @@ npm run lint -w @family-wishes/web    # ESLint for the web app
 | --- | --- |
 | A button on the website does nothing or errors after many code edits | Restart `next dev`. Turbopack can serve stale server actions after many hot reloads. |
 | The QR code never appears | Check the worker terminal is running and its `DATABASE_URL` matches the web app's. |
-| `429 ... free_tier ... limit: 0` in the worker log | That Gemini model has no free quota on your key: enable billing, or turn cards off in Settings. |
+| `429 ... free_tier ... limit: 0` in the worker log | That Gemini model has no free quota on your key: set `POLLINATIONS_API_KEY`, enable Gemini billing, or turn cards off in Settings. |
+| `Pollinations returned HTTP 402` | Your Pollinations balance or key budget is used up; top up or pick a cheaper model. |
 | Wishes are drafted but never post | Check a group is chosen on the WhatsApp page and that the drafts are approved. |
 | `Invalid web environment` / `Invalid worker environment` | The message names the bad variable; compare it with the table above. |
 

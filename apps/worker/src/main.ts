@@ -1,4 +1,4 @@
-import { createGeminiCardModel, createGeminiModel } from '@family-wishes/core'
+import { createCardModel, createGeminiModel } from '@family-wishes/core'
 import { createDb, ensureAdmin } from '@family-wishes/db'
 import { pino } from 'pino'
 import type { WorkerDeps } from './deps.ts'
@@ -27,7 +27,12 @@ async function main(): Promise<void> {
     db: handle.db,
     messenger: connection.messenger,
     model: createGeminiModel({ apiKey: env.GEMINI_API_KEY, model: env.GEMINI_MODEL }),
-    cardModel: createGeminiCardModel({ apiKey: env.GEMINI_API_KEY, model: env.GEMINI_IMAGE_MODEL }),
+    cardModel: createCardModel({
+      pollinationsApiKey: env.POLLINATIONS_API_KEY,
+      pollinationsModel: env.POLLINATIONS_IMAGE_MODEL,
+      geminiApiKey: env.GEMINI_API_KEY,
+      geminiModel: env.GEMINI_IMAGE_MODEL
+    }),
     adminPhone: env.ADMIN_PHONE,
     backupDir: env.BACKUP_DIR,
     log,

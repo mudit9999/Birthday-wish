@@ -1,6 +1,6 @@
 'use server'
 
-import { createGeminiCardModel, createGeminiModel, MIN_EDIT_LENGTH } from '@family-wishes/core'
+import { createCardModel, createGeminiModel, MIN_EDIT_LENGTH } from '@family-wishes/core'
 import { revalidatePath } from 'next/cache'
 import { getDb } from '../db'
 import { draftAction, type DraftInput, type DraftModels } from '../drafts'
@@ -40,7 +40,16 @@ function readInput(formData: FormData): DraftInput | null {
 function modelsFor(input: DraftInput): DraftModels {
   const env = getWebEnv()
   if (input.action === 'redo') return { wish: createGeminiModel({ apiKey: env.GEMINI_API_KEY, model: env.GEMINI_MODEL }) }
-  if (input.action === 'card_new') return { card: createGeminiCardModel({ apiKey: env.GEMINI_API_KEY, model: env.GEMINI_IMAGE_MODEL }) }
+  if (input.action === 'card_new') {
+    return {
+      card: createCardModel({
+        pollinationsApiKey: env.POLLINATIONS_API_KEY,
+        pollinationsModel: env.POLLINATIONS_IMAGE_MODEL,
+        geminiApiKey: env.GEMINI_API_KEY,
+        geminiModel: env.GEMINI_IMAGE_MODEL
+      })
+    }
+  }
   return {}
 }
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import { buildCardPrompt, cardGreeting, generateCard, type CardModel } from '../src/wish/card.ts'
+import { buildCardPrompt, cardText, generateCard, type CardModel } from '../src/wish/card.ts'
 import type { WishInput } from '../src/wish/prompt.ts'
 
 const generateContent = vi.hoisted(() => vi.fn())
@@ -9,7 +9,8 @@ vi.mock('@google/genai', () => ({
   })
 }))
 
-const { createGeminiCardModel, DEFAULT_CARD_MODEL } = await import('../src/wish/card.ts')
+const { createCardModel, createGeminiCardModel, createPollinationsCardModel, DEFAULT_CARD_MODEL, DEFAULT_POLLINATIONS_MODEL } =
+  await import('../src/wish/card.ts')
 
 const birthday: WishInput = {
   occasion: 'birthday',
@@ -21,39 +22,46 @@ const birthday: WishInput = {
 }
 const diwali: WishInput = { occasion: 'festival', names: null, familyCallsThem: null, title: null, festivalName: 'Diwali', note: null }
 const PNG = { base64: 'iVBORw0KGgo=', mimeType: 'image/png' }
+const JPEG_BASE64 = '/9j/4AAQSkZJRg=='
 
 afterEach(() => {
   vi.useRealTimers()
   generateContent.mockReset()
 })
 
-describe('cardGreeting', () => {
-  test('uses the name the family calls them, else the names', () => {
-    expect(cardGreeting(birthday)).toBe('Happy Birthday, Chachu')
-    expect(cardGreeting({ ...birthday, familyCallsThem: null })).toBe('Happy Birthday, Rahul')
+describe('cardText', () => {
+  test('puts the name the family calls them on its own line', () => {
+    expect(cardText(birthday)).toEqual({ headline: 'Happy Birthday', name: 'Chachu' })
+    expect(cardText({ ...birthday, familyCallsThem: null })).toEqual({ headline: 'Happy Birthday', name: 'Rahul' })
   })
 
   test('covers festivals, anniversaries and special days', () => {
-    expect(cardGreeting(diwali)).toBe('Happy Diwali')
-    expect(cardGreeting({ ...birthday, occasion: 'anniversary', names: 'Amit & Priya', familyCallsThem: null })).toBe(
-      'Happy Anniversary, Amit & Priya'
-    )
-    expect(cardGreeting({ ...birthday, occasion: 'special', title: 'Housewarming' })).toBe('Housewarming')
+    expect(cardText(diwali)).toEqual({ headline: 'Happy Diwali', name: null })
+    expect(cardText({ ...birthday, occasion: 'anniversary', names: 'Amit & Priya', familyCallsThem: null })).toEqual({
+      headline: 'Happy Anniversary',
+      name: 'Amit & Priya'
+    })
+    expect(cardText({ ...birthday, occasion: 'special', title: 'Housewarming', familyCallsThem: null, names: 'Sharma family' })).toEqual({
+      headline: 'Housewarming',
+      name: 'Sharma family'
+    })
   })
 })
 
 describe('buildCardPrompt', () => {
-  test('asks for the exact greeting, the occasion and the family note', () => {
+  test('quotes the headline and the name separately, and leaves the family note out', () => {
     const prompt = buildCardPrompt(birthday)
-    expect(prompt).toContain('"Happy Birthday, Chachu"')
-    expect(prompt).toContain('birthday')
-    expect(prompt).toContain('Loves cricket')
+    expect(prompt).toContain('"Happy Birthday"')
+    expect(prompt).toContain('"Chachu"')
+    expect(prompt).not.toContain('cricket')
   })
 
-  test('forbids people, extra text and numbers', () => {
-    const prompt = buildCardPrompt(diwali).toLowerCase()
-    for (const rule of ['no people', 'no other words', 'numbers']) expect(prompt).toContain(rule)
-    expect(prompt).toContain('diwali')
+  test('forbids people and any other words, and names the festival', () => {
+    const prompt = buildCardPrompt(diwali)
+    expect(prompt).toContain('"Happy Diwali"')
+    expect(prompt).toContain('Diwali')
+    expect(prompt).toContain('No people')
+    expect(prompt).toContain('No other words')
   })
 })
 
@@ -112,5 +120,55 @@ describe('createGeminiCardModel', () => {
     generateContent.mockResolvedValueOnce({ candidates: [{ content: { parts: [{ text: 'Sorry' }] } }] })
     const gemini = createGeminiCardModel({ apiKey: 'test-key', model: DEFAULT_CARD_MODEL })
     expect(await gemini.generate('PROMPT')).toBeNull()
+  })
+})
+
+describe('createPollinationsCardModel', () => {
+  const ok = (body: unknown) => vi.fn(async () => new Response(JSON.stringify(body), { status: 200 }))
+
+  test('posts the prompt with the key and returns the image, detecting JPEG from its bytes', async () => {
+    const fetchImpl = ok({ data: [{ b64_json: JPEG_BASE64 }] })
+    const card = createPollinationsCardModel({ apiKey: 'sk_test', model: DEFAULT_POLLINATIONS_MODEL, fetchImpl })
+    expect(await card.generate('PROMPT')).toEqual({ base64: JPEG_BASE64, mimeType: 'image/jpeg' })
+    expect(fetchImpl).toHaveBeenCalledWith('https://gen.pollinations.ai/v1/images/generations', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer sk_test', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'tongyi-mai/z-image-turbo', prompt: 'PROMPT', size: '768x1024', response_format: 'b64_json' })
+    })
+  })
+
+  test('detects PNG and returns null for an unknown format or an empty answer', async () => {
+    const png = createPollinationsCardModel({ apiKey: 'k', model: 'm', fetchImpl: ok({ data: [{ b64_json: PNG.base64 }] }) })
+    expect(await png.generate('P')).toEqual(PNG)
+    const svg = createPollinationsCardModel({ apiKey: 'k', model: 'm', fetchImpl: ok({ data: [{ b64_json: 'PHN2Zz4=' }] }) })
+    expect(await svg.generate('P')).toBeNull()
+    const empty = createPollinationsCardModel({ apiKey: 'k', model: 'm', fetchImpl: ok({ data: [] }) })
+    expect(await empty.generate('P')).toBeNull()
+  })
+
+  test('throws on an HTTP error without including the key', async () => {
+    const fetchImpl = vi.fn(async () => new Response('{"error":"budget exhausted"}', { status: 402 }))
+    const card = createPollinationsCardModel({ apiKey: 'sk_secret', model: 'm', fetchImpl })
+    await expect(card.generate('P')).rejects.toThrow(/402/)
+    await expect(card.generate('P')).rejects.not.toThrow(/sk_secret/)
+  })
+})
+
+describe('createCardModel', () => {
+  test('uses Pollinations when its key is set, otherwise Gemini', async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ data: [{ b64_json: JPEG_BASE64 }] }), { status: 200 }))
+    const pollinations = createCardModel({
+      pollinationsApiKey: 'sk_test',
+      pollinationsModel: DEFAULT_POLLINATIONS_MODEL,
+      geminiApiKey: 'g',
+      geminiModel: DEFAULT_CARD_MODEL,
+      fetchImpl
+    })
+    expect((await pollinations.generate('P'))?.mimeType).toBe('image/jpeg')
+    expect(generateContent).not.toHaveBeenCalled()
+
+    generateContent.mockResolvedValueOnce({ candidates: [{ content: { parts: [{ inlineData: { data: PNG.base64, mimeType: 'image/png' } }] } }] })
+    const gemini = createCardModel({ pollinationsModel: DEFAULT_POLLINATIONS_MODEL, geminiApiKey: 'g', geminiModel: DEFAULT_CARD_MODEL })
+    expect(await gemini.generate('P')).toEqual(PNG)
   })
 })
