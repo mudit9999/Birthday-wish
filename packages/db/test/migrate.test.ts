@@ -60,7 +60,7 @@ test('a draft must point at exactly one event or festival', async () => {
   )
   const [festival] = await queryRows<{ id: string }>(
     h.db,
-    sql`insert into festivals (name, date) values ('Holi', '2027-03-22') returning id`
+    sql`insert into festivals (name, date) values ('Constraint Test Fest', '2027-03-22') returning id`
   )
   await expect(
     h.execRaw(
