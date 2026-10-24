@@ -288,3 +288,45 @@ button.danger {
   color: var(--muted);
   padding: 1.5rem 0;
 }
+
+/* Admin */
+.subnav {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.subnav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.badge.ok {
+  background: #dcefdf;
+  color: var(--ok);
+}
+
+.badge.bad {
+  background: #f6dada;
+  color: var(--danger);
+}
+
+.qr {
+  align-self: center;
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 0.5rem;
+}
