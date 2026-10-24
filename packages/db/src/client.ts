@@ -55,3 +55,12 @@ export async function queryRows<T>(db: Db, query: SQL): Promise<T[]> {
   if (Array.isArray(result)) return result as T[]
   return (result as { rows: T[] }).rows
 }
+
+const UNIQUE_VIOLATION = '23505'
+
+/** Whether `error` (or the driver error Drizzle wraps in `cause`) is a Postgres unique violation. */
+export function isUniqueViolation(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false
+  if ((error as { code?: unknown }).code === UNIQUE_VIOLATION) return true
+  return isUniqueViolation((error as { cause?: unknown }).cause)
+}
