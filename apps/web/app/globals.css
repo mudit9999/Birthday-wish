@@ -330,3 +330,40 @@ button.danger {
   background: #fff;
   padding: 0.5rem;
 }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.card header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.card header strong {
+  margin-right: auto;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge.status-approved,
+.badge.status-sent {
+  background: #dcefdf;
+  color: var(--ok);
+}
+
+.badge.status-failed,
+.badge.status-expired {
+  background: #f6dada;
+  color: var(--danger);
+}

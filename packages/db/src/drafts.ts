@@ -102,6 +102,11 @@ export async function applyDraftAction(
   return row ?? null
 }
 
+export async function getDraft(db: Db, id: string): Promise<Draft | null> {
+  const [row] = await db.select(DRAFT_COLUMNS).from(drafts).where(eq(drafts.id, id))
+  return row ?? null
+}
+
 export async function listDraftsForDates(db: Db, dates: ISODate[]): Promise<Draft[]> {
   if (dates.length === 0) return []
   return db
