@@ -1,8 +1,10 @@
 import type { EventInput } from '@family-wishes/core'
 import {
+  addMember,
   applyDraftAction,
   claimJobRun,
   createEvent,
+  enqueueOutbox,
   ensureAdmin,
   findDraftByNumber,
   getEvent,
@@ -13,6 +15,8 @@ import {
   type DbHandle
 } from '@family-wishes/db'
 import { createTestDb } from '@family-wishes/db/testing'
+import { readdir, rm } from 'node:fs/promises'
+import { join } from 'node:path'
 import { afterEach, beforeEach, expect, test } from 'vitest'
 import { fastTick, slowTick, startLoops } from '../src/scheduler.js'
 import { ADMIN_PHONE, fixedNow, testDeps } from './fakes.js'
@@ -136,6 +140,28 @@ test('claimJobRun only succeeds once per job and date', async () => {
   expect(await claimJobRun(h.db, 'x', '2026-12-06')).toBe(true)
 })
 
+test('the nightly backup is written once after 02:00', async () => {
+  const early = testDeps(h.db, { now: at('2026-12-05', '01:59') })
+  await slowTick(early)
+  expect(await readdir(early.backupDir)).toEqual([])
+
+  const deps = testDeps(h.db, { now: at('2026-12-05', '02:00') })
+  await slowTick(deps)
+  expect(await readdir(deps.backupDir)).toEqual(['backup-2026-12-05.json'])
+  const again = testDeps(h.db, { now: at('2026-12-05', '02:01'), backupDir: deps.backupDir })
+  await rm(join(deps.backupDir, 'backup-2026-12-05.json'))
+  await slowTick(again)
+  expect(await readdir(deps.backupDir)).toEqual([])
+})
+
+test('the fast tick sends queued login codes', async () => {
+  await addMember(h.db, { phone: '919811111111', name: 'Nani' })
+  await enqueueOutbox(h.db, '919811111111', 'Your code is 123456')
+  const deps = testDeps(h.db, { now: () => new Date() })
+  await fastTick(deps)
+  expect(deps.messenger.to('919811111111')).toEqual(['Your code is 123456'])
+})
+
 test('startLoops recovers interrupted sends first, then ticks until stopped', async () => {
   await slowTick(testDeps(h.db, { now: at('2026-12-05', '06:00') }))
   const stuck = await findDraftByNumber(h.db, '2026-12-05', 1)
@@ -145,7 +171,7 @@ test('startLoops recovers interrupted sends first, then ticks until stopped', as
   const deps = testDeps(h.db, { now: at('2026-12-05', '20:00') })
   const loops = startLoops(deps, { fastMs: 10, slowMs: 20 })
   await new Promise((resolve) => setTimeout(resolve, 300))
-  loops.stop()
+  await loops.stop()
 
   expect((await findDraftByNumber(h.db, '2026-12-05', 1))?.status).toBe('failed')
   expect(deps.messenger.to('group')).toHaveLength(0)

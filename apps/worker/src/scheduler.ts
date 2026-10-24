@@ -1,13 +1,16 @@
 import { addDays, isTimeReached, localDate, localTime, type ISODate } from '@family-wishes/core'
 import { archivePastOneTimeEvents, claimJobRun, getSettings, takeJobRequests } from '@family-wishes/db'
 import type { WorkerDeps } from './deps.js'
+import { writeBackup } from './jobs/backup.js'
 import { sendFestivalReminder, sendNudge } from './jobs/daily.js'
 import { ensureDraftsFor } from './jobs/drafting.js'
+import { sendOutbox } from './jobs/outbox.js'
 import { expireOldDrafts, postDueDrafts, recoverInterruptedSends } from './jobs/posting.js'
 
 const FAST_TICK_MS = 5_000
 const SLOW_TICK_MS = 60_000
 const FESTIVAL_REMINDER_DAY = '-12-01'
+const BACKUP_TIME = '02:00'
 
 /** Runs one job, logging instead of throwing so the rest of the tick still runs. */
 async function safely<T>(deps: WorkerDeps, job: string, run: () => Promise<T>): Promise<T | undefined> {
@@ -34,9 +37,10 @@ async function clock(deps: WorkerDeps) {
   return { settings, today, tomorrow: addDays(today, 1), time }
 }
 
-/** Every 5 s: post due wishes and handle the admin's "run now" requests. */
+/** Every 5 s: post due wishes, send login codes and handle the admin's "run now" requests. */
 export async function fastTick(deps: WorkerDeps): Promise<void> {
   await safely(deps, 'post', () => postDueDrafts(deps))
+  await safely(deps, 'outbox', () => sendOutbox(deps))
   const requests = (await safely(deps, 'requests', () => takeJobRequests(deps.db))) ?? []
   for (const job of new Set(requests)) {
     if (job === 'draft') {
@@ -56,6 +60,9 @@ export async function slowTick(deps: WorkerDeps): Promise<void> {
     await safely(deps, 'draft-tomorrow', () => ensureDraftsFor(tomorrow, deps))
   }
   await oncePerDay(deps, 'archive', today, () => archivePastOneTimeEvents(deps.db, today))
+  if (isTimeReached(time, BACKUP_TIME)) {
+    await oncePerDay(deps, 'backup', today, () => writeBackup(deps))
+  }
   if (!deps.messenger.isReady()) return
   if (isTimeReached(time, settings.nudgeTime)) {
     await oncePerDay(deps, 'nudge', today, () => sendNudge(deps))
@@ -65,14 +72,17 @@ export async function slowTick(deps: WorkerDeps): Promise<void> {
   }
 }
 
-/** A tick runner that skips a beat instead of overlapping a still-running tick. */
-function nonOverlapping(deps: WorkerDeps, name: string, tick: (deps: WorkerDeps) => Promise<void>): () => Promise<void> {
-  let running = false
-  return async () => {
-    if (running) return
-    running = true
-    await safely(deps, name, () => tick(deps))
-    running = false
+/** A tick runner that skips a beat instead of overlapping a still-running tick; `idle()` waits for the current one. */
+function nonOverlapping(deps: WorkerDeps, name: string, tick: (deps: WorkerDeps) => Promise<void>) {
+  let current: Promise<unknown> | null = null
+  return {
+    run(): Promise<unknown> {
+      current ??= safely(deps, name, () => tick(deps)).finally(() => {
+        current = null
+      })
+      return current
+    },
+    idle: () => current ?? Promise.resolve()
   }
 }
 
@@ -80,24 +90,30 @@ function nonOverlapping(deps: WorkerDeps, name: string, tick: (deps: WorkerDeps)
 export function startLoops(
   deps: WorkerDeps,
   intervals: { fastMs: number; slowMs: number } = { fastMs: FAST_TICK_MS, slowMs: SLOW_TICK_MS }
-): { stop(): void } {
+): { stop(): Promise<void> } {
   const slow = nonOverlapping(deps, 'slow-tick', slowTick)
   const fast = nonOverlapping(deps, 'fast-tick', fastTick)
   let stopped = false
   const timers: ReturnType<typeof setInterval>[] = []
 
   // Recovery must finish before any tick can claim a draft, or it would fail a send in progress.
-  void safely(deps, 'recover', () => recoverInterruptedSends(deps)).then(async () => {
+  const started = safely(deps, 'recover', () => recoverInterruptedSends(deps)).then(async () => {
     if (stopped) return
-    await slow()
+    await slow.run()
     if (stopped) return
-    timers.push(setInterval(() => void slow(), intervals.slowMs), setInterval(() => void fast(), intervals.fastMs))
+    timers.push(
+      setInterval(() => void slow.run(), intervals.slowMs),
+      setInterval(() => void fast.run(), intervals.fastMs)
+    )
   })
 
   return {
-    stop() {
+    /** Stops scheduling and resolves once no tick is running, so the caller can close the database. */
+    async stop() {
       stopped = true
       timers.forEach(clearInterval)
+      await started
+      await Promise.all([slow.idle(), fast.idle()])
     }
   }
 }

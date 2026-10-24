@@ -3,6 +3,7 @@ import {
   applyDraftAction,
   approvedDraftsFor,
   expireDraftsBefore,
+  failInterruptedOutbox,
   failInterruptedSends,
   getSettings,
   type Draft
@@ -53,7 +54,7 @@ export async function expireOldDrafts(deps: WorkerDeps): Promise<number> {
   return expireDraftsBefore(deps.db, localDate(deps.now(), timeZone))
 }
 
-/** Run once on startup: anything left mid-send may or may not have reached the group. */
+/** Run once on startup: anything left mid-send (wish or login code) may or may not have arrived, so it is never resent. */
 export async function recoverInterruptedSends(deps: WorkerDeps): Promise<number> {
-  return failInterruptedSends(deps.db)
+  return (await failInterruptedSends(deps.db)) + (await failInterruptedOutbox(deps.db))
 }

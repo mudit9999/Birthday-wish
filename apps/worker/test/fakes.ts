@@ -1,5 +1,8 @@
 import type { WishModel } from '@family-wishes/core'
 import type { Db } from '@family-wishes/db'
+import { mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { pino } from 'pino'
 import type { WorkerDeps } from '../src/deps.js'
 import type { Messenger } from '../src/wa/messenger.js'
@@ -75,7 +78,7 @@ export function testDeps(db: Db, overrides: Partial<WorkerDeps> = {}): WorkerDep
     messenger: new FakeMessenger(),
     model: new FakeModel(['Happy day from all of us! 🎉 Wishing you lots of love and laughter.']),
     adminPhone: ADMIN_PHONE,
-    backupDir: '',
+    backupDir: mkdtempSync(join(tmpdir(), 'fw-backups-')),
     log: pino({ level: 'silent' }),
     now: fixedNow('2026-12-04T20:00:00+05:30'),
     ...overrides
