@@ -1,4 +1,7 @@
 import type { WishModel } from '@family-wishes/core'
+import type { Db } from '@family-wishes/db'
+import { pino } from 'pino'
+import type { WorkerDeps } from '../src/deps.js'
 import type { Messenger } from '../src/wa/messenger.js'
 
 export type SentMessage = { to: 'group' | 'self' | string; text: string }
@@ -61,4 +64,20 @@ export class FakeModel implements WishModel {
 export function fixedNow(iso: string): () => Date {
   const at = new Date(iso)
   return () => new Date(at)
+}
+
+export const ADMIN_PHONE = '919800000000'
+
+/** WorkerDeps wired to fakes and a silent logger; override anything per test. */
+export function testDeps(db: Db, overrides: Partial<WorkerDeps> = {}): WorkerDeps & { messenger: FakeMessenger } {
+  return {
+    db,
+    messenger: new FakeMessenger(),
+    model: new FakeModel(['Happy day from all of us! 🎉 Wishing you lots of love and laughter.']),
+    adminPhone: ADMIN_PHONE,
+    backupDir: '',
+    log: pino({ level: 'silent' }),
+    now: fixedNow('2026-12-04T20:00:00+05:30'),
+    ...overrides
+  } as WorkerDeps & { messenger: FakeMessenger }
 }

@@ -69,7 +69,8 @@ export const drafts = pgTable(
     createdAt: createdAt(),
     updatedAt: timestamptz('updated_at'),
     approvedAt: timestamptz('approved_at'),
-    sentAt: timestamptz('sent_at')
+    sentAt: timestamptz('sent_at'),
+    notifiedAt: timestamptz('notified_at')
   },
   (t) => [
     unique().on(t.occurrenceDate, t.eventId),

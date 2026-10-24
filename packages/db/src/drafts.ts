@@ -4,11 +4,14 @@ import {
   type DraftAction,
   type DraftSource,
   type DraftStatus,
-  type ISODate
+  type ISODate,
+  type Occurrence
 } from '@family-wishes/core'
-import { and, asc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { drafts } from './schema.js'
 import type { Db } from './client.js'
+import { getEvent } from './events.js'
+import { getFestival } from './festivals.js'
 
 export interface Draft {
   id: string
@@ -158,4 +161,29 @@ export async function failInterruptedSends(db: Db): Promise<number> {
     .where(eq(drafts.status, 'sending'))
     .returning({ id: drafts.id })
   return failed.length
+}
+
+/** Pending drafts for `date` the admin hasn't been sent yet. */
+export async function unnotifiedDrafts(db: Db, date: ISODate): Promise<Draft[]> {
+  return db
+    .select(DRAFT_COLUMNS)
+    .from(drafts)
+    .where(and(eq(drafts.occurrenceDate, date), eq(drafts.status, 'pending'), isNull(drafts.notifiedAt)))
+    .orderBy(asc(drafts.number))
+}
+
+export async function markNotified(db: Db, ids: string[]): Promise<void> {
+  if (ids.length === 0) return
+  await db.update(drafts).set({ notifiedAt: sql`now()` }).where(inArray(drafts.id, ids))
+}
+
+/** The event or festival a draft wishes for, or null if it has since been deleted. */
+export async function occurrenceForDraft(db: Db, draft: Draft): Promise<Occurrence | null> {
+  const date = draft.occurrenceDate
+  if (draft.eventId) {
+    const event = await getEvent(db, draft.eventId)
+    return event ? { kind: 'event', date, event } : null
+  }
+  const festival = draft.festivalId ? await getFestival(db, draft.festivalId) : null
+  return festival ? { kind: 'festival', date, festival } : null
 }
