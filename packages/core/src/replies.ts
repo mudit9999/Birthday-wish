@@ -59,5 +59,6 @@ export function parseReply(text: string, openNumbers: number[]): Reply {
 
   const [only] = openNumbers
   if (openNumbers.length === 1 && only !== undefined) return parseEdit(only, trimmed, openNumbers)
+  if (trimmed.length < MIN_EDIT_LENGTH) return invalid(`That's too short to be a wish, so I didn't use it. ${HELP}`)
   return invalid(`Several drafts are open. Start a new wish with its number, e.g. "${openNumbers[0]} <your text>".`)
 }

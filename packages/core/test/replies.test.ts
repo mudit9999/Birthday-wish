@@ -40,10 +40,13 @@ test.each([
 })
 
 test('the short-text reason tells the admin what to send', () => {
-  const r = parseReply('thanks', [1])
-  expect(r).toMatchObject({ kind: 'invalid' })
-  const reason = (r as { reason: string }).reason
-  for (const word of ['ok', 'skip', 'redo']) expect(reason).toContain(word)
+  for (const open of [[1], [1, 2]]) {
+    const r = parseReply('thanks', open)
+    expect(r).toMatchObject({ kind: 'invalid' })
+    const reason = (r as { reason: string }).reason
+    expect(reason).toContain('too short')
+    for (const word of ['ok', 'skip', 'redo']) expect(reason).toContain(word)
+  }
 })
 
 test('an edit exactly MIN_EDIT_LENGTH long is accepted', () => {
