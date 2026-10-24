@@ -60,15 +60,15 @@ export function addDays(date: ISODate, days: number): ISODate {
   return fromUtcMidnight(shifted)
 }
 
-const DAYS_PER_4_YEARS = 4
-const DAYS_PER_100_YEARS = 100
-const DAYS_PER_400_YEARS = 400
+const LEAP_YEAR_DIVISOR_4 = 4
+const LEAP_YEAR_DIVISOR_100 = 100
+const LEAP_YEAR_DIVISOR_400 = 400
 
 /** Whether `year` is a leap year in the Gregorian calendar. */
 export function isLeapYear(year: number): boolean {
-  if (year % DAYS_PER_400_YEARS === 0) return true
-  if (year % DAYS_PER_100_YEARS === 0) return false
-  return year % DAYS_PER_4_YEARS === 0
+  if (year % LEAP_YEAR_DIVISOR_400 === 0) return true
+  if (year % LEAP_YEAR_DIVISOR_100 === 0) return false
+  return year % LEAP_YEAR_DIVISOR_4 === 0
 }
 
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
