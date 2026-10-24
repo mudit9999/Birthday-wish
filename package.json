@@ -1,0 +1,20 @@
+{
+  "name": "family-wishes",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "db:migrate": "tsx packages/db/src/migrate.ts"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "5.0.5",
+    "typescript": "7.0.2",
+    "tsx": "4.23.15",
+    "vitest": "5.0.5"
+  }
+}
