@@ -1,0 +1,15 @@
+**/node_modules
+**/.next
+**/coverage
+**/test
+**/e2e
+**/test-results
+**/playwright-report
+.git
+.claude
+.superpowers
+.pglite*
+**/.env
+**/.env.*
+deploy/worker/data
+docs

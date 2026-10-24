@@ -1,0 +1,16 @@
+services:
+  worker:
+    build:
+      context: ../..
+      dockerfile: apps/worker/Dockerfile
+    env_file: .env
+    restart: unless-stopped
+    # Room for a human-paced send (typing delay) to finish before the container is killed.
+    stop_grace_period: 30s
+    volumes:
+      - ./data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

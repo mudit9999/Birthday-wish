@@ -10,7 +10,8 @@
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "db:migrate": "tsx packages/db/src/migrate.ts"
+    "db:migrate": "tsx --env-file-if-exists=.env packages/db/src/migrate.ts",
+    "worker:dev": "tsx --env-file=.env apps/worker/src/main.ts"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "5.0.5",
