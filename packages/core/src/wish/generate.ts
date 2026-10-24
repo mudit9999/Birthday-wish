@@ -1,6 +1,6 @@
-import { fallbackWish } from './fallback.js'
-import { mentionsAge } from './guard.js'
-import { buildWishPrompt, type WishInput } from './prompt.js'
+import { fallbackWish } from './fallback.ts'
+import { mentionsAge } from './guard.ts'
+import { buildWishPrompt, type WishInput } from './prompt.ts'
 
 export interface WishModel {
   generate(req: { system: string; prompt: string }): Promise<string>

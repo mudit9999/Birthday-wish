@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import type { FamilyEvent, Festival } from '../src/occurrences.js'
-import { buildWishPrompt, DEFAULT_AI_STYLE, toWishInput, type WishInput } from '../src/wish/prompt.js'
-import { mentionsAge } from '../src/wish/guard.js'
-import { fallbackWish } from '../src/wish/fallback.js'
-import { generateWish, type WishModel } from '../src/wish/generate.js'
+import type { FamilyEvent, Festival } from '../src/occurrences.ts'
+import { buildWishPrompt, DEFAULT_AI_STYLE, toWishInput, type WishInput } from '../src/wish/prompt.ts'
+import { mentionsAge } from '../src/wish/guard.ts'
+import { fallbackWish } from '../src/wish/fallback.ts'
+import { generateWish, type WishModel } from '../src/wish/generate.ts'
 
 const generateContent = vi.hoisted(() => vi.fn())
 vi.mock('@google/genai', () => ({
@@ -12,7 +12,7 @@ vi.mock('@google/genai', () => ({
   })
 }))
 
-const { createGeminiModel, DEFAULT_GEMINI_MODEL } = await import('../src/wish/gemini.js')
+const { createGeminiModel, DEFAULT_GEMINI_MODEL } = await import('../src/wish/gemini.ts')
 
 function ev(overrides: Partial<FamilyEvent> = {}): FamilyEvent {
   return {

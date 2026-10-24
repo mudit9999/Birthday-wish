@@ -6,9 +6,9 @@ import {
 } from '@family-wishes/db'
 import { createTestDb } from '@family-wishes/db/testing'
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { sendOutbox } from '../src/jobs/outbox.js'
-import { recoverInterruptedSends } from '../src/jobs/posting.js'
-import { ADMIN_PHONE, testDeps } from './fakes.js'
+import { sendOutbox } from '../src/jobs/outbox.ts'
+import { recoverInterruptedSends } from '../src/jobs/posting.ts'
+import { ADMIN_PHONE, testDeps } from './fakes.ts'
 
 const MEMBER = '919811111111'
 

@@ -1,7 +1,7 @@
 import type { WAMessage } from 'baileys'
 import { expect, test } from 'vitest'
-import { extractAdminReply } from '../src/wa/incoming.js'
-import { SentIds } from '../src/wa/messenger.js'
+import { extractAdminReply } from '../src/wa/incoming.ts'
+import { SentIds } from '../src/wa/messenger.ts'
 
 const PHONE_JID = '919800000000@s.whatsapp.net'
 const LID_JID = '123456789012345@lid'

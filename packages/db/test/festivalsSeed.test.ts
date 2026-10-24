@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import type { DbHandle } from '../src/client.js'
-import { listFestivals } from '../src/festivals.js'
-import { createTestDb } from '../src/testing.js'
+import type { DbHandle } from '../src/client.ts'
+import { listFestivals } from '../src/festivals.ts'
+import { createTestDb } from '../src/testing.ts'
 
 const NAMES = [
   'Lohri', 'Makar Sankranti', 'Vasant Panchami', 'Maha Shivratri', 'Holi', 'Chaitra Navratri', 'Ram Navami',

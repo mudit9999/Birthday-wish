@@ -1,6 +1,6 @@
 import { asc, eq, inArray, sql } from 'drizzle-orm'
-import { outbox } from './schema.js'
-import type { Db } from './client.js'
+import { outbox } from './schema.ts'
+import type { Db } from './client.ts'
 
 export interface OutboxRow {
   id: string

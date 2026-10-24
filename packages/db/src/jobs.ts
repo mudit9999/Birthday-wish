@@ -1,7 +1,7 @@
 import type { ISODate } from '@family-wishes/core'
 import { isNull, sql } from 'drizzle-orm'
-import { jobRequests, jobRuns } from './schema.js'
-import type { Db } from './client.js'
+import { jobRequests, jobRuns } from './schema.ts'
+import type { Db } from './client.ts'
 
 export type RequestedJob = 'draft' | 'send'
 

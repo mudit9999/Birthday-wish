@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import type { EventType } from './occurrences.js'
-import type { ISODate } from './time.js'
+import type { EventType } from './occurrences.ts'
+import type { ISODate } from './time.ts'
 
 export interface EventInput {
   type: EventType

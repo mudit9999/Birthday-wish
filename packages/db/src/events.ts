@@ -1,7 +1,7 @@
 import type { EventInput, FamilyEvent, ISODate } from '@family-wishes/core'
 import { and, asc, eq, sql, type SQL } from 'drizzle-orm'
-import { events } from './schema.js'
-import type { Db } from './client.js'
+import { events } from './schema.ts'
+import type { Db } from './client.ts'
 
 export type Actor = { id: string; isAdmin: boolean }
 export type MutationResult = 'ok' | 'not_found' | 'forbidden'

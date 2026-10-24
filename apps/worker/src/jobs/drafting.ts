@@ -18,8 +18,8 @@ import {
   unnotifiedDrafts,
   type Draft
 } from '@family-wishes/db'
-import type { WorkerDeps } from '../deps.js'
-import { toBatchItems } from './labels.js'
+import type { WorkerDeps } from '../deps.ts'
+import { toBatchItems } from './labels.ts'
 
 function occasionId(o: Occurrence): string {
   return o.kind === 'event' ? o.event.id : o.festival.id

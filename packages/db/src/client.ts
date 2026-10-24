@@ -1,6 +1,6 @@
 import type { SQL } from 'drizzle-orm'
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core'
-import * as schema from './schema.js'
+import * as schema from './schema.ts'
 
 export type Db = PgDatabase<PgQueryResultHKT, typeof schema>
 

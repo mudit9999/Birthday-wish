@@ -1,4 +1,4 @@
-import { addDays, isLeapYear, type ISODate } from './time.js'
+import { addDays, isLeapYear, type ISODate } from './time.ts'
 
 export type EventType = 'birthday' | 'anniversary' | 'special'
 

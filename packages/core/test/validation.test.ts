@@ -5,7 +5,7 @@ import {
   normalizePhone,
   parseEventInput,
   phoneToJid
-} from '../src/validation.js'
+} from '../src/validation.ts'
 
 const TODAY = '2026-10-24'
 

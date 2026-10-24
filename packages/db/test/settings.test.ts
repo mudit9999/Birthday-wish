@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import type { DbHandle } from '../src/client.js'
-import { getSettings, setSetting } from '../src/settings.js'
-import { createTestDb } from '../src/testing.js'
+import type { DbHandle } from '../src/client.ts'
+import { getSettings, setSetting } from '../src/settings.ts'
+import { createTestDb } from '../src/testing.ts'
 
 let h: DbHandle
 

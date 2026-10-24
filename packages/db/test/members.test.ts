@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import type { DbHandle } from '../src/client.js'
+import type { DbHandle } from '../src/client.ts'
 import {
   addMember,
   ensureAdmin,
@@ -7,8 +7,8 @@ import {
   getMember,
   listMembers,
   removeMember
-} from '../src/members.js'
-import { createTestDb } from '../src/testing.js'
+} from '../src/members.ts'
+import { createTestDb } from '../src/testing.ts'
 
 let h: DbHandle
 

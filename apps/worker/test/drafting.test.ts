@@ -9,8 +9,8 @@ import {
 } from '@family-wishes/db'
 import { createTestDb } from '@family-wishes/db/testing'
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { ensureDraftsFor } from '../src/jobs/drafting.js'
-import { ADMIN_PHONE, FakeModel, testDeps } from './fakes.js'
+import { ensureDraftsFor } from '../src/jobs/drafting.ts'
+import { ADMIN_PHONE, FakeModel, testDeps } from './fakes.ts'
 
 const DATE = '2026-12-05'
 

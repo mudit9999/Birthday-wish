@@ -1,11 +1,11 @@
 import { createGeminiModel } from '@family-wishes/core'
 import { createDb, ensureAdmin } from '@family-wishes/db'
 import { pino } from 'pino'
-import type { WorkerDeps } from './deps.js'
-import { loadWorkerEnv } from './env.js'
-import { handleAdminReply } from './jobs/replies.js'
-import { startLoops } from './scheduler.js'
-import { startConnection } from './wa/connection.js'
+import type { WorkerDeps } from './deps.ts'
+import { loadWorkerEnv } from './env.ts'
+import { handleAdminReply } from './jobs/replies.ts'
+import { startLoops } from './scheduler.ts'
+import { startConnection } from './wa/connection.ts'
 
 // Migrations are not run here: they are an explicit deploy step (`npm run db:migrate`).
 async function main(): Promise<void> {

@@ -1,4 +1,4 @@
-import type { DraftSource } from './draftState.js'
+import type { DraftSource } from './draftState.ts'
 
 export interface BatchItem {
   number: number

@@ -1,6 +1,6 @@
 import { eq, inArray, sql } from 'drizzle-orm'
-import { waAuth, waStatus } from './schema.js'
-import type { Db } from './client.js'
+import { waAuth, waStatus } from './schema.ts'
+import type { Db } from './client.ts'
 
 export type WaState = 'starting' | 'qr' | 'connected' | 'reconnecting' | 'logged_out' | 'wrong_number'
 

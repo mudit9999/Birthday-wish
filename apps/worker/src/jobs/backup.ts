@@ -2,7 +2,7 @@ import { localDate } from '@family-wishes/core'
 import { exportBackup, getSettings } from '@family-wishes/db'
 import { mkdir, readdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { WorkerDeps } from '../deps.js'
+import type { WorkerDeps } from '../deps.ts'
 
 const BACKUPS_TO_KEEP = 14
 const BACKUP_FILE = /^backup-\d{4}-\d{2}-\d{2}\.json$/

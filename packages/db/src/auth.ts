@@ -1,7 +1,7 @@
 import { and, count, desc, eq, gt, gte, sql } from 'drizzle-orm'
-import { loginCodes, members, sessions } from './schema.js'
-import type { Db } from './client.js'
-import type { Member } from './members.js'
+import { loginCodes, members, sessions } from './schema.ts'
+import type { Db } from './client.ts'
+import type { Member } from './members.ts'
 
 export interface LoginCodeRow {
   id: string

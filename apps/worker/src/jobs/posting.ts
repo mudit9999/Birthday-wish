@@ -8,7 +8,7 @@ import {
   getSettings,
   type Draft
 } from '@family-wishes/db'
-import type { WorkerDeps } from '../deps.js'
+import type { WorkerDeps } from '../deps.ts'
 
 // Dates on which the missing-group warning was already logged, so it appears once a day.
 const warnedNoGroup = new Set<string>()

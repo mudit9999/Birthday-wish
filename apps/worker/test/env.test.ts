@@ -1,6 +1,6 @@
 import { DEFAULT_GEMINI_MODEL } from '@family-wishes/core'
 import { expect, test } from 'vitest'
-import { loadWorkerEnv } from '../src/env.js'
+import { loadWorkerEnv } from '../src/env.ts'
 
 const VALID = {
   DATABASE_URL: 'postgres://user:pass@db.example.com:6543/postgres',

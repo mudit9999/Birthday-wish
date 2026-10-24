@@ -11,8 +11,8 @@ import {
 } from '@family-wishes/db'
 import { createTestDb } from '@family-wishes/db/testing'
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { expireOldDrafts, postDueDrafts, recoverInterruptedSends } from '../src/jobs/posting.js'
-import { ADMIN_PHONE, fixedNow, testDeps } from './fakes.js'
+import { expireOldDrafts, postDueDrafts, recoverInterruptedSends } from '../src/jobs/posting.ts'
+import { ADMIN_PHONE, fixedNow, testDeps } from './fakes.ts'
 
 const TODAY = '2026-12-05'
 const GROUP = '120363000000@g.us'

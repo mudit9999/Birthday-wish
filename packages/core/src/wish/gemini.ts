@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai'
-import type { WishModel } from './generate.js'
+import type { WishModel } from './generate.ts'
 
 export const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash-lite'
 

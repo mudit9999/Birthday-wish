@@ -1,6 +1,6 @@
 import type { EventInput } from '@family-wishes/core'
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import type { DbHandle } from '../src/client.js'
+import type { DbHandle } from '../src/client.ts'
 import {
   applyDraftAction,
   approvedDraftsFor,
@@ -11,11 +11,11 @@ import {
   listDraftsForDates,
   openDraftNumbers,
   type Draft
-} from '../src/drafts.js'
-import { createEvent } from '../src/events.js'
-import { createFestival } from '../src/festivals.js'
-import { ensureAdmin } from '../src/members.js'
-import { createTestDb } from '../src/testing.js'
+} from '../src/drafts.ts'
+import { createEvent } from '../src/events.ts'
+import { createFestival } from '../src/festivals.ts'
+import { ensureAdmin } from '../src/members.ts'
+import { createTestDb } from '../src/testing.ts'
 
 let h: DbHandle
 let adminId: string

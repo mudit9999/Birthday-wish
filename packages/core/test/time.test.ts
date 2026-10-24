@@ -6,7 +6,7 @@ import {
   isTimeReached,
   localDate,
   localTime
-} from '../src/time.js'
+} from '../src/time.ts'
 
 describe('time helpers', () => {
   test('local date and time use the given zone, not UTC', () => {

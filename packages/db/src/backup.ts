@@ -1,6 +1,6 @@
 import { asc } from 'drizzle-orm'
-import { events, festivals, members, settings } from './schema.js'
-import type { Db } from './client.js'
+import { events, festivals, members, settings } from './schema.ts'
+import type { Db } from './client.ts'
 
 /** Family data worth restoring. Sessions, login codes, WhatsApp keys and the outbox are deliberately left out. */
 export async function exportBackup(db: Db) {

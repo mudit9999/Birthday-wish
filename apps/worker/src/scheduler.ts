@@ -1,11 +1,11 @@
 import { addDays, isTimeReached, localDate, localTime, type ISODate } from '@family-wishes/core'
 import { archivePastOneTimeEvents, claimJobRun, getSettings, takeJobRequests } from '@family-wishes/db'
-import type { WorkerDeps } from './deps.js'
-import { writeBackup } from './jobs/backup.js'
-import { sendFestivalReminder, sendNudge } from './jobs/daily.js'
-import { ensureDraftsFor } from './jobs/drafting.js'
-import { sendOutbox } from './jobs/outbox.js'
-import { expireOldDrafts, postDueDrafts, recoverInterruptedSends } from './jobs/posting.js'
+import type { WorkerDeps } from './deps.ts'
+import { writeBackup } from './jobs/backup.ts'
+import { sendFestivalReminder, sendNudge } from './jobs/daily.ts'
+import { ensureDraftsFor } from './jobs/drafting.ts'
+import { sendOutbox } from './jobs/outbox.ts'
+import { expireOldDrafts, postDueDrafts, recoverInterruptedSends } from './jobs/posting.ts'
 
 const FAST_TICK_MS = 5_000
 const SLOW_TICK_MS = 60_000

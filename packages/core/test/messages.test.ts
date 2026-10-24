@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { formatDraftBatch, formatNudge, type BatchItem } from '../src/messages.js'
+import { formatDraftBatch, formatNudge, type BatchItem } from '../src/messages.ts'
 
 const items: BatchItem[] = [
   { number: 1, label: 'Birthday — Rahul (Chachu)', text: 'Happy birthday Chachu! 🎂', source: 'ai' },

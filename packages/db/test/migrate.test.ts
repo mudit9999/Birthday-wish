@@ -4,9 +4,9 @@ import { join } from 'node:path'
 import { DEFAULT_AI_STYLE } from '@family-wishes/core'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import { createDb, queryRows, type DbHandle } from '../src/client.js'
-import { runMigrations } from '../src/migrate.js'
-import { createTestDb } from '../src/testing.js'
+import { createDb, queryRows, type DbHandle } from '../src/client.ts'
+import { runMigrations } from '../src/migrate.ts'
+import { createTestDb } from '../src/testing.ts'
 
 const TABLES = [
   'members', 'events', 'festivals', 'drafts', 'settings', 'login_codes',

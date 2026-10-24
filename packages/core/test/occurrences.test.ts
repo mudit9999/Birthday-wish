@@ -6,7 +6,7 @@ import {
   upcoming,
   type FamilyEvent,
   type Festival
-} from '../src/occurrences.js'
+} from '../src/occurrences.ts'
 
 function ev(overrides: Partial<FamilyEvent> = {}): FamilyEvent {
   return {

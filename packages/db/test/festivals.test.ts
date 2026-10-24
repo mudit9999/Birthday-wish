@@ -1,13 +1,13 @@
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import type { DbHandle } from '../src/client.js'
+import type { DbHandle } from '../src/client.ts'
 import {
   createFestival,
   deleteFestival,
   getFestival,
   listFestivals,
   updateFestival
-} from '../src/festivals.js'
-import { createTestDb } from '../src/testing.js'
+} from '../src/festivals.ts'
+import { createTestDb } from '../src/testing.ts'
 
 let h: DbHandle
 

@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { createHumanMessenger, SentIds, type SocketLike } from '../src/wa/messenger.js'
+import { createHumanMessenger, SentIds, type SocketLike } from '../src/wa/messenger.ts'
 
 const SELF = '919800000000@s.whatsapp.net'
 

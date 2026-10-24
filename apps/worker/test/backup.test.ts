@@ -3,8 +3,8 @@ import { createTestDb } from '@family-wishes/db/testing'
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { writeBackup } from '../src/jobs/backup.js'
-import { ADMIN_PHONE, fixedNow, testDeps } from './fakes.js'
+import { writeBackup } from '../src/jobs/backup.ts'
+import { ADMIN_PHONE, fixedNow, testDeps } from './fakes.ts'
 
 let h: DbHandle
 

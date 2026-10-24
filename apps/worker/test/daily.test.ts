@@ -10,8 +10,8 @@ import {
 } from '@family-wishes/db'
 import { createTestDb } from '@family-wishes/db/testing'
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { sendFestivalReminder, sendNudge } from '../src/jobs/daily.js'
-import { ADMIN_PHONE, fixedNow, testDeps } from './fakes.js'
+import { sendFestivalReminder, sendNudge } from '../src/jobs/daily.ts'
+import { ADMIN_PHONE, fixedNow, testDeps } from './fakes.ts'
 
 let h: DbHandle
 let adminId: string

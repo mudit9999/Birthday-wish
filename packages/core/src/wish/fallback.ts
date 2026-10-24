@@ -1,4 +1,4 @@
-import type { WishInput } from './prompt.js'
+import type { WishInput } from './prompt.ts'
 
 // A digit in a name or title could carry an age ("Rohan 1st job"), so it is replaced.
 function safe(value: string | null, fallback: string): string {

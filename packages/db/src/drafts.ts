@@ -8,10 +8,10 @@ import {
   type Occurrence
 } from '@family-wishes/core'
 import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm'
-import { drafts } from './schema.js'
-import type { Db } from './client.js'
-import { getEvent } from './events.js'
-import { getFestival } from './festivals.js'
+import { drafts } from './schema.ts'
+import type { Db } from './client.ts'
+import { getEvent } from './events.ts'
+import { getFestival } from './festivals.ts'
 
 export interface Draft {
   id: string

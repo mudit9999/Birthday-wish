@@ -1,6 +1,6 @@
 import { and, asc, eq } from 'drizzle-orm'
-import { members } from './schema.js'
-import type { Db } from './client.js'
+import { members } from './schema.ts'
+import type { Db } from './client.ts'
 
 export interface Member {
   id: string

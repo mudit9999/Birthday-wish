@@ -2,7 +2,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { sql } from 'drizzle-orm'
-import { createDb, queryRows, type DbHandle } from './client.js'
+import { createDb, queryRows, type DbHandle } from './client.ts'
 
 export const MIGRATIONS_DIR = fileURLToPath(new URL('../../../supabase/migrations/', import.meta.url))
 

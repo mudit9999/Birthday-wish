@@ -1,7 +1,7 @@
 import type { Festival, ISODate } from '@family-wishes/core'
 import { and, asc, eq, gte, lte } from 'drizzle-orm'
-import { festivals } from './schema.js'
-import { isUniqueViolation, type Db } from './client.js'
+import { festivals } from './schema.ts'
+import { isUniqueViolation, type Db } from './client.ts'
 
 const FESTIVAL_COLUMNS = { id: festivals.id, name: festivals.name, date: festivals.date }
 

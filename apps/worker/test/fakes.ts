@@ -4,8 +4,8 @@ import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pino } from 'pino'
-import type { WorkerDeps } from '../src/deps.js'
-import type { Messenger } from '../src/wa/messenger.js'
+import type { WorkerDeps } from '../src/deps.ts'
+import type { Messenger } from '../src/wa/messenger.ts'
 
 export type SentMessage = { to: 'group' | 'self' | string; text: string }
 

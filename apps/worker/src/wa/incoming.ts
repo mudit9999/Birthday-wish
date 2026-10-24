@@ -1,5 +1,5 @@
 import { jidNormalizedUser, type WAMessage } from 'baileys'
-import type { SentIds } from './messenger.js'
+import type { SentIds } from './messenger.ts'
 
 /**
  * The admin's reply text if `msg` is something they typed in their own "Message yourself" chat, else null.

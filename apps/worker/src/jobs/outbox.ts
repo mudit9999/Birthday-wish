@@ -1,5 +1,5 @@
 import { claimQueuedOutbox, findMemberByPhone, finishOutbox, type OutboxRow } from '@family-wishes/db'
-import type { WorkerDeps } from '../deps.js'
+import type { WorkerDeps } from '../deps.ts'
 
 const BATCH_SIZE = 10
 const CODE_LIFETIME_MS = 10 * 60 * 1000

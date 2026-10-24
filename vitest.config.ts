@@ -7,8 +7,14 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['packages/*/src/**', 'apps/worker/src/**', 'apps/web/lib/**'],
-      // Live-socket and process entry points are verified manually (plan Task 12 step 5, Task 18 step 5).
-      exclude: ['apps/worker/src/wa/connection.ts', 'apps/worker/src/main.ts'],
+      // Live-socket, process entry and Next request glue (cookies/redirect) are verified manually and by the E2E smoke test.
+      exclude: [
+        'apps/worker/src/wa/connection.ts',
+        'apps/worker/src/main.ts',
+        'apps/web/lib/actions/**',
+        'apps/web/lib/guards.ts',
+        'apps/web/lib/db.ts'
+      ],
       thresholds: {
         lines: 80
       }

@@ -1,6 +1,6 @@
 import type { ISODate } from '@family-wishes/core'
-import { settings } from './schema.js'
-import type { Db } from './client.js'
+import { settings } from './schema.ts'
+import type { Db } from './client.ts'
 
 export interface Settings {
   groupId: string | null

@@ -8,9 +8,9 @@ import makeWASocket, {
   type WASocket
 } from 'baileys'
 import type { Logger } from 'pino'
-import { useDbAuthState } from './authState.js'
-import { extractAdminReply } from './incoming.js'
-import { createHumanMessenger, SentIds, type Messenger } from './messenger.js'
+import { useDbAuthState } from './authState.ts'
+import { extractAdminReply } from './incoming.ts'
+import { createHumanMessenger, SentIds, type Messenger } from './messenger.ts'
 
 const BACKOFF_START_MS = 1000
 const BACKOFF_MAX_MS = 60_000

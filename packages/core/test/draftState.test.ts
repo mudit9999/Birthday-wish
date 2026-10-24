@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { allowedFrom, nextStatus, type DraftAction, type DraftStatus } from '../src/draftState.js'
+import { allowedFrom, nextStatus, type DraftAction, type DraftStatus } from '../src/draftState.ts'
 
 const STATUSES: DraftStatus[] = ['pending', 'approved', 'sending', 'sent', 'skipped', 'expired', 'failed']
 const ACTIONS: DraftAction[] = ['approve', 'edit', 'skip', 'redo', 'claim', 'markSent', 'markFailed', 'expire']

@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { MIN_EDIT_LENGTH, parseReply } from '../src/replies.js'
+import { MIN_EDIT_LENGTH, parseReply } from '../src/replies.ts'
 
 test.each([
   ['ok', [1], { kind: 'approve', number: 1 }],

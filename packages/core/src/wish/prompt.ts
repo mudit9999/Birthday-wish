@@ -1,4 +1,4 @@
-import type { EventType, Occurrence } from '../occurrences.js'
+import type { EventType, Occurrence } from '../occurrences.ts'
 
 /** Everything the generator may see. Deliberately has no year, so age can't leak in. */
 export interface WishInput {

@@ -3,7 +3,7 @@ import { createTestDb } from '@family-wishes/db/testing'
 import { initAuthCreds, proto } from 'baileys'
 import { randomBytes } from 'node:crypto'
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import { useDbAuthState } from '../src/wa/authState.js'
+import { useDbAuthState } from '../src/wa/authState.ts'
 
 let h: DbHandle
 

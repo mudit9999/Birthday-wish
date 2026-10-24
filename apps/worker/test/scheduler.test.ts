@@ -18,8 +18,8 @@ import { createTestDb } from '@family-wishes/db/testing'
 import { readdir, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { fastTick, slowTick, startLoops } from '../src/scheduler.js'
-import { ADMIN_PHONE, fixedNow, testDeps } from './fakes.js'
+import { fastTick, slowTick, startLoops } from '../src/scheduler.ts'
+import { ADMIN_PHONE, fixedNow, testDeps } from './fakes.ts'
 
 const GROUP = '120363000000@g.us'
 const at = (date: string, time: string) => fixedNow(`${date}T${time}:00+05:30`)

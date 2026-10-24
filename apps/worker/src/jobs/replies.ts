@@ -8,8 +8,8 @@ import {
   type Draft,
   type Settings
 } from '@family-wishes/db'
-import type { WorkerDeps } from '../deps.js'
-import { draftLabel, toBatchItems } from './labels.js'
+import type { WorkerDeps } from '../deps.ts'
+import { draftLabel, toBatchItems } from './labels.ts'
 
 const NOTHING_WAITING = 'No drafts are waiting right now.'
 

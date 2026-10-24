@@ -1,7 +1,7 @@
 import { formatNudge, localDate } from '@family-wishes/core'
 import { getSettings, listDraftsForDates, setSetting } from '@family-wishes/db'
-import type { WorkerDeps } from '../deps.js'
-import { toBatchItems } from './labels.js'
+import type { WorkerDeps } from '../deps.ts'
+import { toBatchItems } from './labels.ts'
 
 /** Reminds the admin about today's unapproved drafts. Returns whether a reminder was sent. */
 export async function sendNudge(deps: WorkerDeps): Promise<boolean> {
