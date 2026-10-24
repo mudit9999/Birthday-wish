@@ -11,6 +11,7 @@ export type DraftCardProps = {
   error: string | null
   text: string
   postsAt: string
+  isToday: boolean
   action: (prev: NoticeState, formData: FormData) => Promise<NoticeState>
 }
 
@@ -26,7 +27,7 @@ const STATUS: Record<string, { label: string; pill: string }> = {
 }
 const SOURCE: Record<string, string> = { ai: 'Written by Gemini', template: 'Template (AI unavailable)', admin: 'Your text' }
 
-export function DraftCard({ number, label, status, source, error, text, postsAt, action }: DraftCardProps) {
+export function DraftCard({ number, label, status, source, error, text, postsAt, isToday, action }: DraftCardProps) {
   const [state, formAction, pending] = useActionState(action, { message: null, error: false })
   const open = OPEN.includes(status)
   const s = STATUS[status] ?? { label: status, pill: '' }
@@ -72,7 +73,26 @@ export function DraftCard({ number, label, status, source, error, text, postsAt,
           </dl>
           {open && (
             <div className="buttons">
-              <button type="submit" name="intent" value="approve" disabled={pending || status === 'approved'}>
+              {isToday && (
+                <button
+                  type="submit"
+                  name="intent"
+                  value="post_now"
+                  disabled={pending}
+                  onClick={(event) => {
+                    if (!window.confirm('Post this wish to the family group now?')) event.preventDefault()
+                  }}
+                >
+                  Approve &amp; post now
+                </button>
+              )}
+              <button
+                type="submit"
+                name="intent"
+                value="approve"
+                className={isToday ? 'secondary' : undefined}
+                disabled={pending || status === 'approved'}
+              >
                 Approve
               </button>
               <button type="submit" name="intent" value="edit" className="secondary" disabled={pending}>

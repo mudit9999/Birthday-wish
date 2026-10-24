@@ -9,15 +9,25 @@ import { requireAdmin } from '../guards'
 import type { NoticeState } from './admin'
 
 const MESSAGES = {
-  ok: { approve: 'Approved.', skip: 'Skipped.', redo: 'New draft written.', edit: 'Your text is saved and approved.' },
+  ok: {
+    approve: 'Approved.',
+    skip: 'Skipped.',
+    redo: 'New draft written.',
+    edit: 'Your text is saved and approved.',
+    post_now: 'Approved. It will be in the group within a few seconds.'
+  },
   forbidden: 'Only the admin can do that.',
   not_allowed: 'This draft has already been posted or closed, so nothing changed.',
-  too_short: `That's too short to be a wish (at least ${MIN_EDIT_LENGTH} characters).`
+  too_short: `That's too short to be a wish (at least ${MIN_EDIT_LENGTH} characters).`,
+  not_today: 'Only today’s wishes can be posted now. This one posts on its own day.',
+  no_group: 'Choose the family group on the WhatsApp page first.',
+  not_connected: 'WhatsApp isn’t connected right now, so nothing was posted. Check the WhatsApp page.'
 } as const
 
 function readInput(formData: FormData): DraftInput | null {
   const intent = String(formData.get('intent') ?? '')
-  if (intent === 'edit') return { action: 'edit', text: String(formData.get('text') ?? '') }
+  const text = String(formData.get('text') ?? '')
+  if (intent === 'edit' || intent === 'post_now') return { action: intent, text }
   if (intent === 'approve' || intent === 'skip' || intent === 'redo') return { action: intent }
   return null
 }

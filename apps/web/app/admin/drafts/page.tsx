@@ -11,7 +11,21 @@ async function labelFor(db: Db, draft: Draft): Promise<string> {
   return occurrence ? occurrenceLabel(occurrence) : `Wish ${draft.number}`
 }
 
-async function Day({ db, title, drafts, postsAt, empty }: { db: Db; title: string; drafts: Draft[]; postsAt: string; empty: string }) {
+async function Day({
+  db,
+  title,
+  drafts,
+  postsAt,
+  empty,
+  isToday = false
+}: {
+  db: Db
+  title: string
+  drafts: Draft[]
+  postsAt: string
+  empty: string
+  isToday?: boolean
+}) {
   const labels = await Promise.all(drafts.map((d) => labelFor(db, d)))
   const waiting = drafts.filter((d) => d.status === 'pending').length
   return (
@@ -34,6 +48,7 @@ async function Day({ db, title, drafts, postsAt, empty }: { db: Db; title: strin
               error={d.error}
               text={d.text}
               postsAt={postsAt}
+              isToday={isToday}
               action={draftFormAction.bind(null, d.id)}
             />
           ))}
@@ -66,7 +81,7 @@ export default async function DraftsPage() {
           </p>
         </div>
       </header>
-      <Day db={db} title={`Today · ${formatDateLabel(today)}`} drafts={on(today)} postsAt={sendTime} empty="No wishes today." />
+      <Day db={db} title={`Today · ${formatDateLabel(today)}`} drafts={on(today)} postsAt={sendTime} empty="No wishes today." isToday />
       <Day
         db={db}
         title={`Tomorrow · ${formatDateLabel(tomorrow)}`}
