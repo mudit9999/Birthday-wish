@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { chooseGroup, runNow } from '../admin'
+import { addFamilyMember, chooseGroup, removeFamilyMember, removeFestival, runNow, saveFestival, saveSettings } from '../admin'
 import { getDb } from '../db'
 import { requireAdmin } from '../guards'
 
@@ -26,4 +26,60 @@ export async function runNowAction(job: string): Promise<NoticeState> {
   if (job !== 'draft' && job !== 'send') return { message: 'Unknown job.', error: true }
   await runNow(await getDb(), admin, job)
   return { message: RUN_NOW_MESSAGES[job], error: false }
+}
+
+const field = (formData: FormData, name: string) => String(formData.get(name) ?? '')
+
+const MEMBER_MESSAGES = {
+  ok: 'Added. They can now sign in with this number.',
+  forbidden: 'Only the admin can do that.',
+  invalid_phone: 'That doesn’t look like a mobile number.',
+  invalid_name: 'Please enter a name (up to 60 characters).',
+  duplicate: 'That number is already on the list.'
+} as const
+
+export async function addMemberAction(_prev: NoticeState, formData: FormData): Promise<NoticeState> {
+  const admin = await requireAdmin()
+  const result = await addFamilyMember(await getDb(), admin, { phone: field(formData, 'phone'), name: field(formData, 'name') })
+  revalidatePath('/admin/members')
+  return { message: MEMBER_MESSAGES[result], error: result !== 'ok' }
+}
+
+export async function removeMemberAction(id: string): Promise<void> {
+  const admin = await requireAdmin()
+  await removeFamilyMember(await getDb(), admin, id)
+  revalidatePath('/admin/members')
+}
+
+const FESTIVAL_MESSAGES = {
+  ok: 'Saved.',
+  forbidden: 'Only the admin can do that.',
+  invalid: 'Enter a name and a real date.',
+  duplicate: 'That festival is already on that date.',
+  not_found: 'That festival no longer exists.'
+} as const
+
+export async function saveFestivalAction(id: string | null, _prev: NoticeState, formData: FormData): Promise<NoticeState> {
+  const admin = await requireAdmin()
+  const result = await saveFestival(await getDb(), admin, id, { name: field(formData, 'name'), date: field(formData, 'date') })
+  revalidatePath('/admin/festivals')
+  return { message: FESTIVAL_MESSAGES[result], error: result !== 'ok' }
+}
+
+export async function deleteFestivalAction(id: string): Promise<void> {
+  const admin = await requireAdmin()
+  await removeFestival(await getDb(), admin, id)
+  revalidatePath('/admin/festivals')
+}
+
+export type SettingsFormState = { errors: Record<string, string>; saved: boolean }
+
+const SETTING_FIELDS = ['draft_time', 'nudge_time', 'send_time', 'time_zone', 'country_code', 'ai_style'] as const
+
+export async function saveSettingsAction(_prev: SettingsFormState, formData: FormData): Promise<SettingsFormState> {
+  const admin = await requireAdmin()
+  const raw = Object.fromEntries(SETTING_FIELDS.map((name) => [name, field(formData, name)]))
+  const result = await saveSettings(await getDb(), admin, raw)
+  revalidatePath('/admin', 'layout')
+  return result.ok ? { errors: {}, saved: true } : { errors: result.errors, saved: false }
 }
