@@ -190,4 +190,4 @@ The first time, install the browser with `npx playwright install chromium`.
 
 ## Deployment
 
-The web app runs on Vercel and the worker on a small always-on server (an Oracle Cloud Always Free VM) using `apps/worker/Dockerfile` and `deploy/worker/docker-compose.yml`. Follow the step-by-step guide in [docs/deploy.md](docs/deploy.md), which ends with the go-live checklist.
+The web app runs on Vercel and the worker on a small always-on server (an Oracle Cloud Always Free VM or a Google Cloud e2-micro) using `apps/worker/Dockerfile` and `deploy/worker/docker-compose.yml`. Follow the step-by-step guide in [docs/deploy.md](docs/deploy.md), which ends with the go-live checklist.

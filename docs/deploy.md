@@ -6,7 +6,7 @@ This guide takes Family Wishes from your laptop to always-on hosting:
 | --- | --- | --- |
 | Database | Supabase, region `ap-south-1` (Mumbai) | Free plan |
 | Website (`apps/web`) | Vercel | Hobby plan |
-| Worker (`apps/worker`) | Oracle Cloud Always Free VM, in Docker | Free |
+| Worker (`apps/worker`) | An always-on Linux VM in Docker: Oracle Cloud Always Free, or a Google Cloud e2-micro | Oracle free; Google about $4/month |
 
 Do the [local setup in the README](../README.md#run-it-locally) first, and run the **verification checklist** at the end of this guide with a test number and a test group *before* you deploy.
 
@@ -15,7 +15,7 @@ Do the [local setup in the README](../README.md#run-it-locally) first, and run t
 ## 1. Supabase
 
 1. Create a project at [supabase.com](https://supabase.com) in region **South Asia (Mumbai) `ap-south-1`**. Save the database password somewhere safe.
-2. Open **Connect** → **Transaction pooler** and copy the URI (port **6543**). This is `DATABASE_URL` for both the website and the worker. The pooler works over IPv4, which the Oracle VM and Vercel need. If the password contains `@`, `#` or `/`, percent-encode it.
+2. Open **Connect** → **Transaction pooler** and copy the URI (port **6543**). This is `DATABASE_URL` for both the website and the worker. The pooler works over IPv4, which the worker's VM and Vercel need. If the password contains `@`, `#` or `/`, percent-encode it.
 3. Create the tables from your laptop:
 
    ```powershell
@@ -50,9 +50,20 @@ Free Supabase projects pause after a week without activity. The worker queries t
 
 If the website shows `Invalid web environment`, the message names the variable to fix. Redeploy after changing environment variables.
 
-## 3. Oracle Cloud VM (worker)
+## 3. Worker server
 
-### Get a free Oracle Cloud account
+The worker needs a small Linux server that runs all the time. Pick one:
+
+| Option | Cost | Notes |
+| --- | --- | --- |
+| **A. Oracle Cloud Always Free** | Free | 1 OCPU / 6 GB Arm VM. Sign-up often rejects cards, and free capacity can be scarce. |
+| **B. Google Cloud e2-micro** | About $4 a month (covered by the $300 trial credit for the first 90 days) | 1 GB memory, US regions only. The VM is free; its public IPv4 address isn't. |
+
+Then follow **Install Docker** onwards, which is the same for both.
+
+### Option A: Oracle Cloud (free)
+
+#### Get a free Oracle Cloud account
 
 1. Sign up at [oracle.com/cloud/free](https://www.oracle.com/cloud/free/) with your email, phone number and a card in your own name. The card is only verified with a small temporary hold. Some Indian debit cards are declined; a credit card usually works.
 2. Pick the **home region** carefully: Always Free VMs can only be created there and it can't be changed later. **India West (Mumbai)** sits next to Supabase; **India South (Hyderabad)** is a good fallback if Mumbai often has no free capacity. The worker isn't latency-sensitive, so either is fine.
@@ -60,7 +71,7 @@ If the website shows `Invalid web environment`, the message names the variable t
 
 > **Idle VMs get reclaimed.** Oracle may reclaim an Always Free instance if, over 7 days, its 95th-percentile CPU, network and memory use are all under 20%. The worker is light, so it can look idle. To avoid this, upgrade the account to **Pay As You Go**: Always Free resources stay free, and you pay only for anything above the free limits. Set a small budget alert under **Billing → Budgets** in case something non-free gets created by mistake. Upgrading also helps with "out of host capacity" errors.
 
-### Create the VM
+#### Create the VM
 
 1. In the Oracle Cloud console, **Compute → Instances → Create instance**.
 2. **Image and shape**: change the image to **Canonical Ubuntu 24.04**, and the shape to **Ampere → VM.Standard.A1.Flex** with **1 OCPU and 6 GB** memory. The shape shows an *Always Free-eligible* label.
@@ -73,9 +84,50 @@ If you get **"Out of host capacity"**, try the other availability domains in the
 
 When the instance is *Running*, copy its **Public IP address** from the instance page.
 
+### Option B: Google Cloud e2-micro (about $4 a month)
+
+Google's free tier includes one **e2-micro** VM that runs non-stop, in `us-west1`, `us-central1` or `us-east1`, with a 30 GB standard disk. Two things around it aren't free:
+
+- The VM's public IPv4 address: $0.005 an hour, about **$3.65 a month**.
+- Outgoing traffic above **1 GB a month**. The worker's database polling uses roughly that much, so expect a few cents at most.
+
+New accounts get **$300 of credit for 90 days**, which covers this at first.
+
+#### Create the account
+
+1. Go to [cloud.google.com/free](https://cloud.google.com/free), sign in with a Google account and start the free trial. A card is needed for verification.
+2. Create a project, e.g. `family-wishes`, and enable the **Compute Engine API** when the console asks.
+3. Under **Billing → Budgets & alerts**, create a budget of **$5 a month** with email alerts.
+4. When the 90-day trial ends, choose **Activate full account**, or Google stops the VM.
+
+#### Create the VM
+
+1. **Compute Engine → VM instances → Create instance**.
+2. **Region**: `us-central1` (Iowa), `us-west1` or `us-east1`; only these get the free e2-micro. Any zone.
+3. **Machine type**: **E2 → e2-micro** (2 shared vCPUs, 1 GB memory).
+4. **Boot disk → Change**: **Ubuntu 24.04 LTS** (x86/64), disk type **Standard persistent disk**, size **30 GB**. The default *Balanced* disk is **not** free.
+5. **Networking**: keep the default network with an **ephemeral** external IPv4 address. Leave the HTTP/HTTPS boxes unticked; the worker needs no open ports.
+6. **Create**.
+
+The worker then runs in the US while Supabase is in Mumbai. Each database query takes about a quarter of a second longer, which doesn't matter for the worker.
+
+#### Add swap
+
+1 GB of memory is too tight for building the Docker image. Click **SSH** on the VM's row (it opens a terminal in your browser) and add 2 GB of swap once:
+
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+Then carry on with **Install Docker** in the same browser terminal.
+
 ### Install Docker
 
-SSH in and install Docker Engine with the Compose plugin. From Windows PowerShell, with a key Oracle generated for you:
+SSH in and install Docker Engine with the Compose plugin. On Google Cloud, use the browser **SSH** button. On Oracle, from Windows PowerShell with the key Oracle generated for you:
 
 ```powershell
 # OpenSSH refuses keys other users can read, so lock the file down once
@@ -144,7 +196,7 @@ docker compose up -d --build
 docker compose logs -f
 ```
 
-The first build takes a few minutes on the A1 shape. The log should show the worker starting and waiting for a WhatsApp link. Press `Ctrl+C` to stop following the log; the worker keeps running and restarts on reboot (`restart: unless-stopped`).
+The first build takes a few minutes (10 or more on an e2-micro). The log should show the worker starting and waiting for a WhatsApp link. Press `Ctrl+C` to stop following the log; the worker keeps running and restarts on reboot (`restart: unless-stopped`).
 
 ### Day-to-day
 
