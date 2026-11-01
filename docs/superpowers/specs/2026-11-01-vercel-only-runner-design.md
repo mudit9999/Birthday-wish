@@ -1,6 +1,6 @@
 # Family Wishes on Vercel only — Design
 
-Date: 2026-11-01 · Status: **draft, awaiting approval** · Builds on [2026-10-24-family-wishes-design.md](2026-10-24-family-wishes-design.md)
+Date: 2026-11-01 · Status: **approved 2026-11-01** · Builds on [2026-10-24-family-wishes-design.md](2026-10-24-family-wishes-design.md)
 
 ## Context
 
