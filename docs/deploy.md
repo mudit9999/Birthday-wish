@@ -52,15 +52,38 @@ If the website shows `Invalid web environment`, the message names the variable t
 
 ## 3. Oracle Cloud VM (worker)
 
+### Get a free Oracle Cloud account
+
+1. Sign up at [oracle.com/cloud/free](https://www.oracle.com/cloud/free/) with your email, phone number and a card in your own name. The card is only verified with a small temporary hold. Some Indian debit cards are declined; a credit card usually works.
+2. Pick the **home region** carefully: Always Free VMs can only be created there and it can't be changed later. **India West (Mumbai)** sits next to Supabase; **India South (Hyderabad)** is a good fallback if Mumbai often has no free capacity. The worker isn't latency-sensitive, so either is fine.
+3. You get a 30-day trial with credits, then the account continues on **Always Free**. Always Free Ampere A1 is **2 OCPUs and 12 GB of memory in total** (Oracle halved it from 4 OCPUs / 24 GB in 2026). The 1 OCPU / 6 GB VM below fits easily.
+
+> **Idle VMs get reclaimed.** Oracle may reclaim an Always Free instance if, over 7 days, its 95th-percentile CPU, network and memory use are all under 20%. The worker is light, so it can look idle. To avoid this, upgrade the account to **Pay As You Go**: Always Free resources stay free, and you pay only for anything above the free limits. Set a small budget alert under **Billing → Budgets** in case something non-free gets created by mistake. Upgrading also helps with "out of host capacity" errors.
+
 ### Create the VM
 
 1. In the Oracle Cloud console, **Compute → Instances → Create instance**.
-2. Image **Canonical Ubuntu 24.04**, shape **VM.Standard.A1.Flex** (Ampere, Always Free) with **1 OCPU and 6 GB** memory.
-3. Add your SSH public key. Leave the default security list: **SSH (22) only**. The worker makes outgoing connections only and needs no open ports.
+2. **Image and shape**: change the image to **Canonical Ubuntu 24.04**, and the shape to **Ampere → VM.Standard.A1.Flex** with **1 OCPU and 6 GB** memory. The shape shows an *Always Free-eligible* label.
+3. **Networking**: let it create a new virtual cloud network with a public subnet, and keep **Assign a public IPv4 address** on.
+4. **SSH keys**: either let Oracle generate a key pair and **download the private key**, or paste your own public key (`Get-Content ~\.ssh\id_ed25519.pub` after `ssh-keygen -t ed25519` on Windows).
+5. **Boot volume**: keep the default (about 47 GB; Always Free includes 200 GB in total). Press **Create**.
+6. Leave the default security list: **SSH (22) only**. The worker makes outgoing connections only and needs no open ports.
+
+If you get **"Out of host capacity"**, try the other availability domains in the *Placement* section, try again later (nights and weekends work better), or upgrade to Pay As You Go.
+
+When the instance is *Running*, copy its **Public IP address** from the instance page.
 
 ### Install Docker
 
-SSH in (`ssh ubuntu@<public-ip>`) and install Docker Engine with the Compose plugin:
+SSH in and install Docker Engine with the Compose plugin. From Windows PowerShell, with a key Oracle generated for you:
+
+```powershell
+# OpenSSH refuses keys other users can read, so lock the file down once
+icacls C:\path\to\ssh-key.key /inheritance:r /grant:r "$($env:USERNAME):(R)"
+ssh -i C:\path\to\ssh-key.key ubuntu@<public-ip>
+```
+
+(With your own key in `~\.ssh`, plain `ssh ubuntu@<public-ip>` works.) Then, on the VM:
 
 ```bash
 sudo apt-get update
