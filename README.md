@@ -172,7 +172,10 @@ npm test                              # all unit and integration tests (Vitest, 
 npm run coverage                      # same, with a coverage report
 npm run typecheck                     # every package
 npm run lint -w @family-wishes/web    # ESLint for the web app
+npm run e2e                           # Playwright smoke test (starts next dev on port 3100 with a throwaway PGlite database)
 ```
+
+The first time, install the browser with `npx playwright install chromium`.
 
 ## Troubleshooting
 
@@ -187,4 +190,4 @@ npm run lint -w @family-wishes/web    # ESLint for the web app
 
 ## Deployment
 
-The web app is meant for Vercel and the worker for a small always-on server (for example an Oracle Cloud free VM) using `apps/worker/Dockerfile` and `deploy/worker/docker-compose.yml`. A step-by-step deployment guide comes next.
+The web app runs on Vercel and the worker on a small always-on server (an Oracle Cloud Always Free VM) using `apps/worker/Dockerfile` and `deploy/worker/docker-compose.yml`. Follow the step-by-step guide in [docs/deploy.md](docs/deploy.md), which ends with the go-live checklist.
